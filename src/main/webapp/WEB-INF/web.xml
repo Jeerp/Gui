@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="JeerpDa" version="3.0">
+  <display-name>Jeerp GUI</display-name>
+  
+  <welcome-file-list>
+  		<welcome-file>index.html</welcome-file>
+        <welcome-file>desktop/dashboard.html</welcome-file>
+  </welcome-file-list>
+    
+<context-param>
+    <param-name>name</param-name>
+    <param-value>Building%20Total</param-value>
+</context-param>
+<context-param>
+    <param-name>totalpower</param-name>
+    <param-value>drain-tpe</param-value>
+</context-param>
+<context-param>
+    <param-name>totalenergy</param-name>
+    <param-value>drain-tpe</param-value>
+</context-param>
+<context-param>
+    <param-name>power</param-name>
+    <param-value>m1-p1|m1-p2|m1-p3|m2-p1|m2-p2|m2-p3</param-value>
+</context-param>
+<context-param>
+    <param-name>energy</param-name>
+    <param-value>m1-p1|m1-p2|m1-p3|m2-p1|m2-p2|m2-p3</param-value>
+</context-param>
+<context-param>
+    <param-name>place</param-name>
+    <param-value>mirafiori</param-value>
+</context-param>
+
+</web-app>

@@ -1,0 +1,313 @@
+<!-- ***************************************************************************
+*Copyright (c) 2014 Proxima Centauri srl <info@proxima-centauri.it>.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU Public License v3.0
+* which accompanies this distribution, and is available at
+* http://www.gnu.org/licenses/gpl.html
+*  
+* Contributors:
+*     Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
+**************************************************************************** -->
+
+<!DOCTYPE html>
+<html ng-app>
+<head>
+<meta http-equiv="Content-Type" content="text/html;">
+<meta name="viewport" content="width=device-width">
+
+<link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
+<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+
+<!-- general js -->
+<script type="text/javascript" src="js/general.js"></script>
+<script type="text/javascript" src="js/new_general.js"></script>
+
+<!-- css template  -->
+ <link rel="stylesheet" type="text/css" href="css/style.css"> 
+  <link rel="stylesheet" type="text/css" href="css/style_clim.css"> 
+
+<!-- script jquery -->
+<script type="text/javascript" src="js/jquery-ui-1.10.2.custom.min.js"></script>
+
+<!--  script angular js-->
+<script type="text/javascript" src="js/angular.min.js"></script>
+
+<!-- date js -->
+<script type="text/javascript" src="js/moment.min.js"></script>
+<script type="text/javascript" src="js/it.js"></script>
+
+<script>
+
+var hdc;
+
+//shorthand func
+function byId(e){return document.getElementById(e);}
+
+function myInit()
+{
+ // get the target image
+ var img = byId('image');
+
+ var x,y, w,h;
+
+ // get it's position and width+height
+ x = img.offsetLeft;
+ y = img.offsetTop;
+ w = img.clientWidth;
+ h = img.clientHeight;
+
+ // move the canvas, so it's contained by the same parent as the image
+ var imgParent = img.parentNode;
+ var can = byId('myCanvas');
+ imgParent.appendChild(can);
+
+ // place the canvas in front of the image
+ can.style.zIndex = 1;
+
+ // position it over the image
+ can.style.left = x+'px';
+ can.style.top = y+'px';
+
+ // make same size as the image
+ can.setAttribute('width', w+'px');
+ can.setAttribute('height', h+'px');
+
+ // get it's context
+ hdc = can.getContext('2d');
+
+ // set the 'default' values for the colour/width of fill/stroke operations
+ hdc.fillStyle = 'white';
+ hdc.strokeStyle = 'white';
+ hdc.lineWidth = 2;
+}
+
+function enter(sens){
+	$('#'+sens).css("color","black");
+	var id=document.getElementById(sens+'div').getElementsByClassName('div_nomeSens')[0].id;
+	$('#'+id).css("color","black");
+	$('#'+sens+"W").css("color","black");
+}
+
+function rimanda(div){
+	var href=document.getElementById(div).getElementsByTagName('a')[0].getAttribute('href');
+	window.location=href;
+}
+
+function leave(sens){
+	$('#'+sens).css("color","#FFFFFF");
+	var id=document.getElementById(sens+'div').getElementsByClassName('div_nomeSens')[0].id;
+	$('#'+id).css("color","#FFFFFF");
+	$('#'+sens+"W").css("color","#FFFFFF");
+}
+
+$(document).ready(function(){
+	$("button").button();
+	$("#backtohome").click(function(){
+		window.location='index.html';
+	});
+	
+	var altezza=document.getElementById("image").height;
+	var larghezza=altezza*1.24;
+	$("#div_box").css("width",larghezza);
+	$("#div_box").css("height",altezza);
+	
+
+	window.onresize =function(){
+	altezza=document.getElementById("image").height;
+	larghezza=altezza*1.24;
+	$("#div_box").css("width",larghezza);
+	$("#div_box").css("height",altezza);
+	}
+		
+	var sensori = GetURLParameter('power'); 
+	console.log("sensori:"+sensori);
+	if(typeof sensori !="undefined"){
+		var sensoriarray;
+		sensoriarray = sensori.split('|');
+		
+		var initial_value=[];
+			var now = (moment()/1000).toFixed(0);
+			//faccio un ciclo che aggiunde uno spazione per ogni sensore
+			for(var j=0; j<sensoriarray.length; j++){
+				(function(j){
+					var sens = sensoriarray[j];
+					var ist_query = instant_query+sens;
+					$.ajax({
+						url: ist_query,
+						dataType: 'jsonp',
+						success: function(data){
+							initial_value[j] = data.value;
+							
+							if(initial_value[j]>=3500){ $("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(1%,rgba(51,51,51,1)), color-stop(39%,rgba(206,49,49,1)), color-stop(74%,rgba(255,0,0,1)))");
+							$("#"+sens+"div").css("background","-moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(51,51,51,1) 1%, rgba(206,49,49,1) 39%, rgba(255,0,0,1) 74%)");
+							$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(51,51,51,1) 1%,rgba(206,49,49,1) 39%,rgba(255,0,0,1) 74%)");
+							}
+							else if(initial_value[j]>=2000){ $("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(1%,rgba(51,51,51,1)), color-stop(39%,rgba(209,92,50,1)), color-stop(74%,rgba(255,136,0,1)))");
+									$("#"+sens+"div").css("background","-moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(51,51,51,1) 1%, rgba(209,92,50,1) 39%, rgba(255,136,0,1) 74%)");
+									$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(51,51,51,1) 1%,rgba(209,92,50,1) 39%,rgba(255,136,0,1) 74%)");
+									}
+							else if(initial_value[j]>=1000){ $("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(39%,rgba(198,176,47,1)), color-stop(74%,rgba(255,216,0,1)))");
+									$("#"+sens+"div").css("background","-moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(198,176,47,1) 39%, rgba(255,216,0,1) 74%)");
+									$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(198,176,47,1) 39%,rgba(255,216,0,1) 74%)");
+									}
+							else if(initial_value[j]>=200){ $("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(34%,rgba(139,188,47,1)), color-stop(74%,rgba(156,229,0,1)))"); 
+								$("#"+sens+"div").css("background","-moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(139,188,47,1) 34%, rgba(156,229,0,1) 74%)");
+								$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(139,188,47,1) 34%,rgba(156,229,0,1) 74%)");
+									}
+							else if(initial_value[j]>=0){ $("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(31%,rgba(36,147,48,1)), color-stop(71%,rgba(0,186,31,1)))"); 
+									$("#"+sens+"div").css("background"," -moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(36,147,48,1) 31%, rgba(0,186,31,1) 71%)");
+									$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(36,147,48,1) 31%,rgba(0,186,31,1) 71%)");
+									}
+							$("#"+sens+"div").css("border-style","outset");
+							$("#"+sens+"div").css("border-color","#707070");
+							
+							$("#"+sens).text(" "+round(initial_value[j]));
+							$("#"+sens+"div").css("border-style","outset");
+							$("#"+sens+"div").css("border-color","#707070");
+						}
+					});
+				})(j);
+			}
+			
+			 
+		}
+		else{
+			$("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(34%,rgba(99,99,99,1)), color-stop(74%,rgba(178,178,178,1)))"); 
+			$("#"+sens+"div").css("background","-moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(99,99,99,1) 34%, rgba(178,178,178,1) 74%)");
+			$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(99,99,99,1) 34%,rgba(178,178,178,1) 74%)");
+			$("#"+sens).text("nd");
+		}
+	
+	setInterval(function(){
+		if(typeof sensori !="undefined"){
+		//$("span.value").html(''); 
+		var now2 = (moment()/1000).toFixed(0);
+		var i=0;
+		var ist_value = [];
+		for(i = 0; i <sensoriarray.length; i++){
+			(function(i){
+				var sens = sensoriarray[i];
+				var ist_query = instant_query+sens;
+				$.ajax({
+					url: ist_query,
+					dataType: 'jsonp',
+					success: function(data){
+						ist_value[i] = data.value;
+						//prendo il valore attuale dello span
+						if(ist_value[i]>=3500){ 
+							$("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(1%,rgba(51,51,51,1)), color-stop(39%,rgba(206,49,49,1)), color-stop(74%,rgba(255,0,0,1)))");
+							$("#"+sens+"div").css("background","-moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(51,51,51,1) 1%, rgba(206,49,49,1) 39%, rgba(255,0,0,1) 74%)");
+							$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(51,51,51,1) 1%,rgba(206,49,49,1) 39%,rgba(255,0,0,1) 74%)");
+							}
+						else if(ist_value[i]>=2000){ $("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(1%,rgba(51,51,51,1)), color-stop(39%,rgba(209,92,50,1)), color-stop(74%,rgba(255,136,0,1)))");
+							$("#"+sens+"div").css("background","-moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(51,51,51,1) 1%, rgba(209,92,50,1) 39%, rgba(255,136,0,1) 74%)");
+							$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(51,51,51,1) 1%,rgba(209,92,50,1) 39%,rgba(255,136,0,1) 74%)");
+							}
+						else if(ist_value[i]>=1000){ $("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(39%,rgba(198,176,47,1)), color-stop(74%,rgba(255,216,0,1)))");
+							$("#"+sens+"div").css("background","-moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(198,176,47,1) 39%, rgba(255,216,0,1) 74%)");
+							$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(198,176,47,1) 39%,rgba(255,216,0,1) 74%)");
+							}
+						else if(ist_value[i]>=200){ $("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(34%,rgba(139,188,47,1)), color-stop(74%,rgba(156,229,0,1)))"); 
+							$("#"+sens+"div").css("background","-moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(139,188,47,1) 34%, rgba(156,229,0,1) 74%)");
+							$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(139,188,47,1) 34%,rgba(156,229,0,1) 74%)");
+							}
+						else if(ist_value[i]>=0){ $("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(31%,rgba(36,147,48,1)), color-stop(71%,rgba(0,186,31,1)))"); 
+							$("#"+sens+"div").css("background"," -moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(36,147,48,1) 31%, rgba(0,186,31,1) 71%)");
+							$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(36,147,48,1) 31%,rgba(0,186,31,1) 71%)");
+							}
+						$("#"+sens).text(" "+round(ist_value[i]));
+					}
+				});
+			})(i);
+		}}else{
+			$("#"+sens+"div").css("background","-webkit-gradient(linear, left top, right top, color-stop(0%,rgba(51,51,51,1)), color-stop(34%,rgba(99,99,99,1)), color-stop(74%,rgba(178,178,178,1)))"); 
+			$("#"+sens+"div").css("background","-moz-linear-gradient(left, rgba(51,51,51,1) 0%, rgba(99,99,99,1) 34%, rgba(178,178,178,1) 74%)");
+			$("#"+sens+"div").css("background","-ms-linear-gradient(left, rgba(51,51,51,1) 0%,rgba(99,99,99,1) 34%,rgba(178,178,178,1) 74%)");
+			$("#"+sens).text("nd");
+		}
+	}, 10000);   
+});
+
+
+</script>
+
+
+<title>Jeerp sensor map</title>
+
+<style>
+	#center {
+		margin:auto;
+	}
+	canvas
+{
+    pointer-events: none;       /* make the canvas transparent to the mouse - needed since canvas is position infront of image */
+    position: absolute;
+}
+</style>
+
+
+</head>
+<body onload="myInit();">
+
+	<div class="application"> 
+	
+	<div class="intestazione">
+		<button id="backtohome"> Back to Home </button>
+		
+		<h1 class="title"> Energy Tree </h1>
+	</div>
+	
+	<div class="fillparent">
+
+		<img id="image" src="img/mappa_sensori6.png" usemap="#mymap" alt="test" style="width:50%; background-color:#f7f2f2; border-radius:10px;"/> 
+		<![if !IE]><canvas id='myCanvas'></canvas> <![endif]>
+		
+	</div>
+	
+	<div id="div_box" style="position: absolute; border-radius:12px; width:45%; height:97%; display: block; left:26%;">
+		
+		<div class="div_sens" id="M500-Pdiv" style="position:absolute; left:4%; top:43%;" onmouseover="enter('M500-P')" onmouseout="leave('M500-P')" onclick="rimanda('M500-Pdiv')">
+			<a href="dashboard.html?name=Total%20Building&totalpower=M500-P&totalenergy=M500-P&power=DRAIN-TPE|DRAIN_OFFICE&energy=DRAIN-TPE" style="color:white;">
+				<span><div class="div_nomeSens" id="a">Total Building</div></span></span><span id="M500-P">nd</span><span id="M500-PW" > W</span> 
+			</a> </div> 
+		<div class="div_sens" id="DRAIN-TPEdiv" style="position:absolute; left:34%; top:24%;" onmouseover="enter('DRAIN-TPE')" onmouseout="leave('DRAIN-TPE')" onclick="rimanda('DRAIN-TPEdiv')">
+			<a href="dashboard.html?name=Server%20Farm&totalpower=DRAIN-TPE&totalenergy=DRAIN-TPE&power=M1-P1|M1-P2|M1-P3|M2-P1|M2-P2|M2-P3&energy=M1-P1|M1-P2|M1-P3|M2-P1|M2-P2|M2-P3" style="color:white;">
+				<span><div class="div_nomeSens" id="b">Server Farm</div></span><span id="DRAIN-TPE">nd</span> <span id="DRAIN-TPEW">W</span> 
+			</a> </div> 
+		<div class="div_sens" id="DRAIN_OFFICEdiv" style="position:absolute; left:34%; top:64%;" onmouseover="enter('DRAIN_OFFICE')" onmouseout="leave('DRAIN_OFFICE')" onclick="rimanda('DRAIN_OFFICEdiv')">
+			<a href="dashboard.html?name=Office&totalpower=DRAIN_OFFICE&totalenergy=DRAIN_OFFICE" style="color:white;">
+				<span><div class="div_nomeSens" id="c">Office</div></span><span id="DRAIN_OFFICE">nd</span> <span id="DRAIN_OFFICEW">W</span> 
+			</a> </div>
+		<div class="div_sens" id="M1-P1div" style="position:absolute; left:68%; top:6%;" onmouseover="enter('M1-P1')"  onmouseout="leave('M1-P1')" onclick="rimanda('M1-P1div')">
+			<a href="dashboard.html?name=Rack1&totalpower=M1-P1&totalenergy=M1-P1" style="color:white;">
+				<span><div class="div_nomeSens" id="d">Rack1</div></span><span id="M1-P1">nd</span> <span id="M1-P1W">W</span> 
+			</a> </div> 
+		<div class="div_sens" id="M1-P2div" style="position:absolute; left:68%; top:21%;" onmouseover="enter('M1-P2')" onmouseout="leave('M1-P2')" onclick="rimanda('M1-P2div')">
+			<a href="dashboard.html?name=Rack2&totalpower=M1-P2&totalenergy=M1-P2" style="color:white;">
+				<span><div class="div_nomeSens" id="e">Rack2</div></span><span id="M1-P2">nd</span> <span id="M1-P2W">W</span> 
+			</a> </div> 
+		<div class="div_sens" id="M1-P3div" style="position:absolute; left:68%; top:36%;" onmouseover="enter('M1-P3')" onmouseout="leave('M1-P3')" onclick="rimanda('M1-P3div')">
+			<a href="dashboard.html?name=Rack3&totalpower=M1-P3&totalenergy=M1-P3" style="color:white;">
+				<span><div class="div_nomeSens" id="f">Rack3</div></span><span id="M1-P3">nd</span> <span id="M1-P3W">W</span> 
+			</a> </div> 
+		<div class="div_sens" id="M2-P1div" style="position:absolute; left:68%; top:51%;" onmouseover="enter('M2-P1')" onmouseout="leave('M2-P1')" onclick="rimanda('M2-P1div')">
+			<a href="dashboard.html?name=Auxiliary&totalpower=M2-P1&totalenergy=M2-P1" style="color:white;">
+				<span><div class="div_nomeSens" id="g">Auxiliary</div></span><span id="M2-P1">nd</span> <span id="M2-P1W">W</span> 
+			</a> </div> 
+		<div class="div_sens"id="M2-P2div" style="position:absolute; left:68%; top:66%;" onmouseover="enter('M2-P2')" onmouseout="leave('M2-P2')" onclick="rimanda('M2-P2div')">
+			<a href="dashboard.html?name=Air%20Conditioner%20-%20Daikin&totalpower=M2-P2&totalenergy=M2-P2" style="color:white;">
+				<span><div class="div_nomeSens" id="h">A.C. 1</div></span><span id="M2-P2">nd</span> <span id="M2-P2W">W</span> 
+			</a> </div> 
+		<div class="div_sens" id="M2-P3div" style="position:absolute; left:68%; top:81%;" onmouseover="enter('M2-P3')" onmouseout="leave('M2-P3')" onclick="rimanda('M2-P3div')">
+			<a href="dashboard.html?name=Air%20Conditioner%20-%20Eca%20Technology&totalpower=M2-P3&totalenergy=M2-P3" style="color:white;">
+				<span><div class="div_nomeSens" id="i">A.C. 2</div></span><span id="M2-P3">nd</span> <span id="M2-P3W">W</span> 
+			</a> </div> 
+		<div style="position:absolute; bottom:0;"> Click on a box to obtain more information about the chosen area </div>
+	</div>
+	</div>
+	
+</body>
+
+</html>

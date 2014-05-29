@@ -1,0 +1,79 @@
+[{                
+	"id":"Totale Edificio",
+    "name":"Totale edificio",
+    "description":"Server Farm",
+     "drains":[
+             {
+              "id":"DRAIN-TPE",
+              "name":"DRAIN-TPE",
+              "description":"drain tot",
+              "alias":"server farm",
+              "total":true,
+              "type":"ActivePower"
+              },
+              {
+              "id":"DRAIN_OFFICE",
+              "name":"DRAIN_OFFICE",
+              "description":"(m500-p)-(drain-tpe)",
+              "alias":"Office",
+              "total":true,
+              "type":"ActivePower"
+              },
+              {
+              "id":"M1-P1",
+              "name":"M1-P1",
+              "description":"sens rack1",
+              "alias":"rack1",
+              "total":false,
+              "type":"ActivePower"
+              },
+              {
+              "id":"M1-P2",
+              "name":"M1-P2",
+              "description":"sens rack2",
+              "alias":"rack2",
+              "total":false,
+              "type":"ActivePower"
+              },
+              {
+              "id":"M1-P3",
+              "name":"M1-P3",
+              "description":"sens rack3",
+              "alias":"rack3",
+              "total":false,
+              "type":"ActivePower"
+              },
+              {
+              "id":"M2-P1",
+              "name":"M2-P1",
+              "description":"sens auxiliary",
+              "alias":"auxiliary",
+              "total":false,
+              "type":"ActivePower"
+              },
+              {
+              "id":"M2-P2",
+              "name":"M2-P2",
+              "description":"split_old",
+              "alias":"A.C. 1",
+              "total":false,
+              "type":"ActivePower"
+              },
+              {
+              "id":"M2-P3",
+              "name":"M2-P3",
+              "description":"split_new",
+              "alias":"A.C. 2",
+              "total":false,
+              "type":"ActivePower"
+              },
+              {
+              "id":"M500-P",
+              "name":"M500-P",
+              "description":"total building",
+              "alias":"Total Building",
+              "total":true,
+              "type":"ActivePower"
+              }
+             ]
+}]

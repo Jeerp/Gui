@@ -1,0 +1,42 @@
+<!-- ***************************************************************************
+*Copyright (c) 2014 Proxima Centauri srl <info@proxima-centauri.it>.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU Public License v3.0
+* which accompanies this distribution, and is available at
+* http://www.gnu.org/licenses/gpl.html
+*  
+* Contributors:
+*     Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
+**************************************************************************** -->
+
+<div class="nome_aula">
+
+<script type="text/javascript">
+
+$().ready(function(){
+	var nameURL=GetURLParameter("name");
+	nameURL=decodeURIComponent(nameURL);
+
+	var name="Server Farm";
+	var path=location.pathname;
+	path_split=path.split("/");
+	var lunghezza=path_split.length;
+	var nome=path_split[lunghezza-1];
+	
+	var nome_aula=nome.split(".");
+	
+	if(nome_aula[0]=="meetingRoom_clim"){
+		name="Meeting Room";
+	}else if(nome_aula[0]=="serverFarm_clim"){
+		name="Server Farm";
+	}else{
+		name=nameURL;
+	}
+	
+	$('#name').append(name);
+});
+
+</script>
+
+	<h1 id="name"> </h1>
+</div>

@@ -1,0 +1,210 @@
+<!-- ***************************************************************************
+*Copyright (c) 2014 Proxima Centauri srl <info@proxima-centauri.it>.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU Public License v3.0
+* which accompanies this distribution, and is available at
+* http://www.gnu.org/licenses/gpl.html
+*  
+* Contributors:
+*     Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
+**************************************************************************** -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	var last_month;
+	var last_day;
+	var last_year;
+	/*OGGI*/
+	var today = moment();
+	var day = today.date();
+	var month = today.month() +1; //perch� il mese parte da zero
+	var year = today.year();
+	//devo prendere l'ora corrente
+	var current_hour = moment().hour();
+	
+	console.log(day+" "+ month +" "+year+" "+current_hour);
+
+	var last_hours = [];
+	for(var i=5; i>=0; i--){
+		last_hours[i]=today.subtract('hour', 1).hour();		
+		//devo prendere anno e mese dell'elemento meno recente
+		if(i==0){
+			last_day = (today.subtract('hour', 1)).date();
+			last_month=(today.subtract('hour', 1)).month()+1;
+			last_year=(today.subtract('hour', 1)).year();
+			console.log("tadaaa "+last_day+" "+last_month+" "+last_year);
+		}
+		
+	}
+	console.log(last_hours);
+	
+	var temp_values =[];
+	var umi_values = [];
+	
+	//devo prendere i nomi dei drain per temperatura ed umidità
+	var draint = GetURLParameter('Temperature', sessionStorage.getItem('url'));
+	var drainu = GetURLParameter('RelativeHumidity', sessionStorage.getItem('url'));
+	
+	//costruisco le due query
+	var query_temp = query_dwh + "SELECT%20[Measures].[Temperature]%20ON%20COLUMNS,"
+	+ "%20CrossJoin([Location].["+draint+"]," + "%20([Time].["
+	+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
+	+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
+	
+	var query_umi = query_dwh + "SELECT%20[Measures].[Humidity]%20ON%20COLUMNS,"
+	+ "%20CrossJoin([Location].["+drainu+"]," + "%20([Time].["
+	+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
+	+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
+	
+	//devo eseguire le query 
+	console.log("query temp " + query_temp);
+	console.log("query umi " + query_umi);
+	
+	$.ajax({
+		url : query_temp,
+		type : "GET",
+		dataType : "jsonp",
+		async : false,
+		success : function(data){
+			console.log("ajax success");
+			//devo salvare i dati nel vettore, come per grafico centrale
+			var count = data.cells.length;
+			console.log(count);
+			for ( var i = 0; i < count; i++) {
+				if(data.cells[i].value!=null){
+					temp_values[i] = parseFloat(data.cells[i].value);
+					temp_values[i] = roundtwo(temp_values[i]);
+				}
+				else{
+					temp_values[i]=null;
+				}
+			}
+		},
+		error : function(xhr, ajaxOptions, thrownErrorxhr){
+			console.log(xhr.status);
+			console.log(thrownErrorxhr.message);
+		},
+		complete : function(){
+			$.ajax({
+				url : query_umi,
+				type : "GET",
+				dataType : "jsonp",
+				async : false,
+				success : function(data) {
+					console.log("ajax success");
+					var count = data.cells.length;
+					console.log(count);
+					for ( var i = 0; i < count; i++) {
+						if(data.cells[i].value!=null){
+							umi_values[i] = parseFloat(data.cells[i].value);
+							umi_values[i] = roundtwo(umi_values[i]);
+						}
+						else{
+							umi_values[i] = null;
+						}
+					}
+				},
+				error: function(){
+					console.log(xhr.status);
+					console.log(thrownErrorxhr.message);
+				},
+				complete: function(){
+					//grafico
+					 var chart = new Highcharts.Chart({
+				         chart: {
+				             renderTo: 'grafico_tu'
+				         },
+				         title: {
+				             text: 'Temperature and Relative Humidity'
+				         },
+				         subtitle: {
+				             text: 'Last 6 hours'
+				         },
+				         xAxis: [{
+				             categories: last_hours
+				         }],
+				         yAxis: [{ // Primary yAxis
+				             labels: {
+				                 formatter: function() {
+				                     return this.value +'°C';
+				                 },
+				                 style: {
+				                     color: '#f5991a'
+				                 }
+				             },
+				             title: {
+				                 text: 'Temperature',
+				                 style: {
+				                     color: '#f5991a'
+				                 }
+				             }
+				           
+				         }, { // Secondary yAxis
+				            // gridLineWidth: 0,
+				             title: {
+				                 text: 'Relative Humidity',
+				                 style: {
+				                     color: '#4572A7'
+				                 }
+				             },
+				             labels: {
+				                 formatter: function() {
+				                     return this.value +' %';
+				                 },
+				                 style: {
+				                     color: '#4572A7'
+				                 }
+				             },
+				             opposite: true,
+				             min: 0
+				 
+				         }],
+				         tooltip: {
+				             shared: true
+				         },
+				         legend: {
+				             layout: 'horizontal',
+				             align: 'center',
+				             verticalAlign: 'top',
+				             y:40
+				         },
+				         series: [{
+				             name: 'Temperature',
+				             color: '#f5991a',
+				             type: 'spline',
+				             yAxis: 0,
+				             data: temp_values,
+				             tooltip: {
+				                 valueSuffix: ' °C'
+				             }
+				 
+				         }, {
+				             name: 'Relative Humidity',
+				             type: 'spline',
+				             color: '#4572A7',
+				             yAxis: 1,
+				             data: umi_values,
+				             marker: {
+				                 enabled: false
+				             },
+				             dashStyle: 'shortdot',
+				             tooltip: {
+				                 valueSuffix: ' %'
+				             }
+				         }]
+				     });
+				}
+			});
+		}
+	});
+	
+
+});
+
+</script>
+<div class="grafico_tempumi">
+
+	<div id="grafico_tu"></div>
+	
+</div>
+

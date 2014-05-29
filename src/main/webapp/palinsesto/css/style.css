@@ -1,0 +1,56 @@
+/*******************************************************************************
+*Copyright (c) 2014 Proxima Centauri srl <info@proxima-centauri.it>.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU Public License v3.0
+* which accompanies this distribution, and is available at
+* http://www.gnu.org/licenses/gpl.html
+*  
+* Contributors:
+*     Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
+*******************************************************************************/
+
+body {
+	height:722px;
+	width:1360px;
+	min-height: 722px;
+	min-width: 1360px;
+	background-color:black;
+	color:white;
+	font-family: 'Roboto', sans-serif;
+
+}
+
+.logo {
+	position:absolute;
+	left:80px;
+	top:0;
+	width:200px;
+}
+
+#titolo, #sottotitolo {
+	text-align:center;
+}
+
+#titolo {
+	font-size:24pt;
+}
+
+#sottotitolo {
+	font-size: 20pt;
+}
+
+#chart, #week_chart {
+	width:97%;
+	margin:auto;
+	height:650px;
+
+}
+
+.footer{
+	font-size: 25px;
+	font-weight: bold;
+	color:#5bb847;
+	text-align: center;
+	height:50px;
+	line-height: 50px;
+}

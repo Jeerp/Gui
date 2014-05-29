@@ -1,0 +1,22 @@
+[{  "children":[],              
+	"id":"AulaStudio",
+    "name":"Aula Studio",
+    "description":"Aula studio Mirafiori",
+    "drains" : [ 
+    	{ "description" : "",
+          "id" : "HVAC-SERVERFARM_T",
+          "name" : "Temperature ServerFarm",
+          "type" : "Temperature"
+        },
+        { "description" : "",
+          "id" : "HVAC_OUTSIDE_T",
+          "name" : "Temperature Outside",
+          "type" : "Temperature"
+        },
+        { "description" : "",
+          "id" : "HVAC_MEETING_T",
+          "name" : "Temperature MeetingRoom",
+          "type" : "Temperature"
+        }
+      ]
+}]

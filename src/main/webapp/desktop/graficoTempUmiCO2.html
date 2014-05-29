@@ -1,0 +1,527 @@
+<!-- ***************************************************************************
+*Copyright (c) 2014 Proxima Centauri srl <info@proxima-centauri.it>.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU Public License v3.0
+* which accompanies this distribution, and is available at
+* http://www.gnu.org/licenses/gpl.html
+*  
+* Contributors:
+*     Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
+**************************************************************************** -->
+
+<script type="text/javascript">
+
+$(document).ready(function () {
+	
+	var path=location.pathname;
+	path_split=path.split("/");
+	var length=path_split.length;
+	var nome=path_split[length-1];
+	var nome_aula=nome.split(".");
+
+	//devo prendere l'ora attuale 
+	var today = moment();
+	
+	var temp_values = [];	
+	var umi_values = [];	
+	var co2_values = [];	
+	var condiz_values= [];
+	var electro_values = [];
+
+
+	var last_hours=[];
+
+	for(var i=23; i>=0; i--){
+		last_hours[i]=today.subtract('hour', 1).hour();
+	}		
+	//devo prendere il parametro dall'url
+	var draint = "HVAC_MEETING_T";	
+	var drainu = "HVAC_OUTSIDE_T";
+	var drainco2 = "HVAC_SERVERFARM_T";
+
+	var query_temp;
+	var query_umi;
+	var query_co2;
+	var query_condiz;
+	var query_electro;
+	
+	//time zone
+	var time_zone=moment().format("ZZ");
+	time_zone.toString();
+	var tz="%2B";
+	for(n=1;n<time_zone.length;n++){
+		tz=tz+time_zone[n];
+	}
+	
+	/*OGGI*/
+	var todayy=moment().subtract('hours', 25).format("YYYY-MM-DDTHH:mm:ss");
+	var todayy2=moment().format("YYYY-MM-DDTHH:mm:ss");
+	todayy=todayy+tz;
+	todayy2=todayy2+tz;
+	todayy_hour=moment().format("H");
+	
+	
+	//devo costruire le query
+	query_temp = week_query + draint + "?timeAggregation=HOUR&start="+ todayy + "&end="+ todayy2;
+	query_umi = week_query + drainu + "?timeAggregation=HOUR&start="+ todayy + "&end="+ todayy2;
+	query_co2 = week_query + drainco2 + "?timeAggregation=HOUR&start="+ todayy + "&end="+ todayy2;
+	query_condiz = week_query + "DRAIN_AIR_CONDITIONER" + "?timeAggregation=HOUR&start="+ todayy + "&end="+ todayy2;
+	query_electro = week_query + "DRAIN_SERVER" + "?timeAggregation=HOUR&start="+ todayy + "&end="+ todayy2;
+	
+	//devo eseguire le query
+	if(nome_aula[0]=="meetingRoom_clim"){
+		$.ajax({
+			url : query_temp,
+			type : "GET",
+			dataType : "jsonp",
+			async : false,
+			success : function(data){
+				console.log('query temp success');
+				//devo salvare i dati nel vettore, come per grafico centrale
+				var count = data.measures.length;
+				for ( var i = 0; i < count; i++) {
+					if(data.measures[i].value!=null){
+						var time = moment(data.measures[i].time);
+						var date = Date.UTC(time.year(), time.month(), time.date(), time.hour(), time.minute(), 0);
+						var obj = new Array();
+						obj[0]=date;
+						obj[1]=roundtwo(parseFloat(data.measures[i].value)); 
+						
+						temp_values[i] = obj; 
+						
+					}
+					else{
+						temp_values[i]=null;
+					}
+				}
+			},
+			error : function(xhr, ajaxOptions, thrownErrorxhr){
+				console.log(xhr.status);
+				console.log(thrownErrorxhr.message);
+			},
+			complete: function(){
+				console.log('ajax complete');
+				
+				//altra query (umi)
+				$.ajax({
+					url : query_umi,
+					type : "GET",
+					dataType : "jsonp",
+					async : false,
+					success: function(data){
+						console.log(data);
+						//devo salvare i dati nel vettore, come per grafico centrale
+						var count = data.measures.length;
+						for ( var i = 0; i < count; i++) {
+							if(data.measures[i].value!=null){
+								var time = moment(data.measures[i].time);
+								var date = Date.UTC(time.year(), time.month(), time.date(), time.hour(), time.minute(), 0);
+								var obj = new Array();
+								obj[0]=date;
+								obj[1]=roundtwo(parseFloat(data.measures[i].value)); 
+								
+								umi_values[i] = obj;
+							}
+							else{
+								umi_values[i]=null;
+							}
+						}
+					},
+					error: function(xhr, ajaxOptions, thrownErrorxhr){
+						console.log(xhr.status);
+						console.log(thrownErrorxhr.message);
+					},
+					complete : function(){
+								console.log("LASTHOURS:"+last_hours);
+								//grafico
+								 var chart = new Highcharts.Chart({
+							         chart: {
+							             renderTo: 'grafico_tuc'
+							         },
+							         title: {
+							             text: 'Meeting Room and Outside Temperaure'
+							         },
+							         subtitle: {
+							             text: 'Last 24 hours'
+							         },
+							         xAxis: {
+							                type: 'datetime',
+							                title: {
+							                    text: null
+							                }
+							            },
+							         yAxis: [{ // Primary yAxis
+							             labels: {
+							                 formatter: function() {
+							                     return this.value +'°C';
+							                 },
+							                 style: {
+							                     color: '#f5991a'
+							                 }
+							             },
+							             title: {
+							                 text: 'Temperature MeetingRoom',
+							                 style: {
+							                     color: '#f5991a'
+							                 }
+							             },
+							             tickInterval: 2,
+							             min: 0,
+							             max:28
+							           
+							         }, { // Secondary yAxis
+							            // gridLineWidth: 0,
+							             title: {
+							                 text: 'Temperature Outside',
+							                 style: {
+							                     color: '#4572A7'
+							                 }
+							             },
+							             labels: {
+							                 formatter: function() {
+							                     return this.value +' °C';
+							                 },
+							                 style: {
+							                     color: '#4572A7'
+							                 }
+							             },
+							             opposite: true,
+							             tickInterval: 2,
+							             min: 0,
+							             max:28
+							         }],
+							         tooltip: {
+							             shared: true
+							         },
+							         legend: {
+							             layout: 'vertical',
+							             align: 'right',
+							             verticalAlign: 'top'
+							         },
+							         series: [ {
+							             name: '°C MeetingRoom',
+							             color: '#f5991a',
+							             type: 'spline',
+							             yAxis: 0,
+							             data: temp_values,
+							             tooltip: {
+							                 valueSuffix: ' °C'
+							             }
+							 
+							         }, {
+							             name: '°C Outside',
+							             type: 'spline',
+							             color: '#4572A7',
+							             yAxis: 1,
+							             data: umi_values,
+							             marker: {
+							                 enabled: true
+							             },
+							             dashStyle: 'shortdot',
+							             tooltip: {
+							                 valueSuffix: ' °C'
+							             }
+							         }]
+							     });
+								
+							}
+						});
+						
+					}
+				});
+
+			 }else{
+				//altra query (umi)
+				 $.ajax({
+						url : query_electro,
+						type : "GET",
+						dataType : "jsonp",
+						async : false,
+						success: function(data){
+						//devo salvare i dati nel vettore, come per grafico centrale
+						var count = data.measures.length;
+						for ( var i = 0; i < count; i++) {
+							if(data.measures[i].value!=null){
+								var time = moment(data.measures[i].time);
+								var date = Date.UTC(time.year(), time.month(), time.date(), time.hour(), time.minute(), 0);
+								var obj = new Array();
+								obj[0]=date;
+								obj[1]=roundtwo(parseFloat(data.measures[i].value)); 
+								
+								electro_values[i] = obj;
+								
+								}else{
+									electro_values[i]=null;
+									}
+								}
+						},
+						error: function(xhr, ajaxOptions, thrownErrorxhr){
+							console.log(xhr.status);
+							console.log(thrownErrorxhr.message);
+						},
+						complete : function(){
+							//altra query (co2)
+							$.ajax({
+								url : query_condiz,
+								type : "GET",
+								dataType : "jsonp",
+								async : false,
+								success: function(data){
+									//devo salvare i dati nel vettore, come per grafico centrale
+									var count = data.measures.length;
+									for ( var i = 0; i < count; i++) {
+										if(data.measures[i].value!=null){
+											var time = moment(data.measures[i].time);
+											var date = Date.UTC(time.year(), time.month(), time.date(), time.hour(), time.minute(), 0);
+											var obj = new Array();
+											obj[0]=date;
+											obj[1]=roundtwo(parseFloat(data.measures[i].value)); 
+											
+											condiz_values[i] = obj;
+										}
+										else{
+											condiz_values[i]=null;
+										}
+									}
+								},
+								error: function(xhr, ajaxOptions, thrownErrorxhr){
+									console.log(xhr.status);
+									console.log(thrownErrorxhr.message);
+								},
+								complete : function(){
+									
+									$.ajax({
+										url : query_co2,
+										type : "GET",
+										dataType : "jsonp",
+										async : false,
+										success: function(data){
+											//devo salvare i dati nel vettore, come per grafico centrale
+											var count = data.measures.length;
+											for ( var i = 0; i < count; i++) {
+												if(data.measures[i].value!=null){
+													var time = moment(data.measures[i].time);
+													var date = Date.UTC(time.year(), time.month(), time.date(), time.hour(), time.minute(), 0);
+													var obj = new Array();
+													obj[0]=date;
+													obj[1]=roundtwo(parseFloat(data.measures[i].value)); 
+													co2_values[i] = obj;
+												}
+												else{
+													co2_values[i]=null;
+												}
+											}
+										},
+										error: function(xhr, ajaxOptions, thrownErrorxhr){
+											console.log(xhr.status);
+											console.log(thrownErrorxhr.message);
+										},
+										complete : function(){
+											
+											$.ajax({
+												url : query_umi,
+												type : "GET",
+												dataType : "jsonp",
+												async : false,
+												success: function(data){
+													//devo salvare i dati nel vettore, come per grafico centrale
+													var count = data.measures.length;
+													for ( var i = 0; i < count; i++) {
+														if(data.measures[i].value!=null){
+															var time = moment(data.measures[i].time);
+															var date = Date.UTC(time.year(), time.month(), time.date(), time.hour(), time.minute(), 0);
+															var obj = new Array();
+															obj[0]=date;
+															obj[1]=roundtwo(parseFloat(data.measures[i].value)); 
+															
+															umi_values[i] = obj;
+														}else{
+															umi_values[i]=null;
+														}
+													}
+												},
+												error: function(xhr, ajaxOptions, thrownErrorxhr){
+													console.log(xhr.status);
+													console.log(thrownErrorxhr.message);
+												},
+												complete : function(){
+	
+									//grafico
+											 var chart = new Highcharts.Chart({
+										         chart: {
+										             renderTo: 'grafico_tuc'
+										         },
+										         title: {
+										             text: 'Temperature and Consumption'
+										         },
+										         subtitle: {
+										             text: 'Last 24 hours'
+										         },
+										         xAxis: {
+										                type: 'datetime',
+										                title: {
+										                    text: null
+										                }
+										            },
+										         yAxis: [{ // electric
+										             title: {
+										                 text: null,
+										                 style: {
+										                     color: '#FFF300'
+										                 }
+										             },
+										             labels: {
+										                 formatter: function() {
+										                     return null;
+										                 },
+										                 style: {
+										                     color: '#FFF300'
+										                 }
+										             },
+										             opposite: true,
+										             tickInterval: 200,
+										             min: 0,
+										             max:3000
+										         }, { // conditioner
+											             title: {
+											                 text: 'Power',
+											                 style: {
+											                     color: '#4CAE10'
+											                 }
+											             },
+											             labels: {
+											                 formatter: function() {
+											                     return this.value +' W';
+											                 },
+											                 style: {
+											                     color: '#4CAE10'
+											                 }
+											             },
+
+											             opposite: true,
+											             tickInterval: 200,
+											             min: 0,
+											             max:3000
+											         }, {  // gridLineWidth: 0,
+											             title: {
+											                 text: null,
+											                 style: {
+											                     color: '#4572A7'
+											                 }
+											             },
+											             labels: {
+											                 formatter: function() {
+											                     return null;
+											                 },
+											                 style: {
+											                     color: '#4572A7'
+											                 }
+											             },
+											             opposite: true,
+											             tickInterval: 2,
+											             min: 0,
+											             max:28
+											         }, {
+												             labels: {
+												                 formatter: function() {
+												                     return this.value +'°C';
+												                 },
+												                 style: {
+												                     color: '#f5991a'
+												                 }
+												             },
+												             title: {
+												                 text: 'Temperature',
+												                 style: {
+												                     color: '#f5991a'
+												                 }
+												             },
+												             tickInterval: 2,
+												             min: 0,
+												             max:28
+												           
+												         },],
+										         tooltip: {
+										             shared: true
+										         },
+										         legend: {
+										             layout: 'vertical',
+										             align: 'right',
+										             verticalAlign: 'top'
+										         },
+										         series: [ {
+										             name: 'W Servers',
+										             type: 'column',
+										             color: '#FFF300',
+										             yAxis: 0,
+										             data: electro_values,
+										             marker: {
+										                 enabled: true
+										             },
+										             tooltip: {
+										                 valueSuffix: ' W'
+										             }
+										             
+										         }, {
+										             name: 'W Air Conditioners',
+										             type: 'column',
+										             color: '#4CAE10',
+										             yAxis: 1,
+										             data: condiz_values,
+										             marker: {
+										                 enabled: true
+										             },
+										             tooltip: {
+										                 valueSuffix: ' W'
+										             }
+										             
+										         }, {
+										             name: '°C Outside',
+										             type: 'spline',
+										             color: '#4572A7',
+										             yAxis: 2,
+										             data: umi_values,
+										             marker: {
+										                 enabled: true
+										             },
+										             dashStyle: 'shortdot',
+										             tooltip: {
+										                 valueSuffix: ' °C'
+										             }
+										             
+										         },{
+										             name: '°C ServerFarm',
+										             color: '#f5991a',
+										             type: 'spline',
+										             yAxis: 3,
+										             data: co2_values,
+										             marker: {
+										                 enabled: true
+										             },
+										             tooltip: {
+										                 valueSuffix: ' °C'
+										             }
+										 
+										         },]
+										     });
+									
+											}
+										});
+										
+									}
+								});
+								}
+							});
+						}
+					});
+
+			}
+});
+
+</script>
+
+<div class="grafico_tempumico2">
+
+	<div id="grafico_tuc"></div>
+	
+</div>

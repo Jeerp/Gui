@@ -1,0 +1,135 @@
+<!-- ***************************************************************************
+*Copyright (c) 2014 Proxima Centauri srl <info@proxima-centauri.it>.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU Public License v3.0
+* which accompanies this distribution, and is available at
+* http://www.gnu.org/licenses/gpl.html
+*  
+* Contributors:
+*     Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
+**************************************************************************** -->
+
+<script type="text/javascript">
+$(document).ready(function(){
+	console.log('ready');
+	var last_month;
+	var last_day;
+	var last_year;
+	/*OGGI*/
+	var today = moment();
+	var day = today.date();
+	var month = today.month() +1; //perch� il mese parte da zero
+	var year = today.year();
+	
+	var last_hours=[];
+	//devo prendere l'ora corrente
+	var current_hour = moment().hour();
+	
+	console.log(day+" "+ month +" "+year+" "+current_hour);
+	
+	//costruisco l'array con le ultime ore
+	
+	for(var i=5; i>=0; i--){
+		last_hours[i]=today.subtract('hour', 1).hour();		
+		//devo prendere anno e mese dell'elemento meno recente
+		if(i==0){
+			last_day = (today.subtract('hour', 1)).date();
+			last_month=(today.subtract('hour', 1)).month()+1;
+			last_year=(today.subtract('hour', 1)).year();
+			console.log("tadaaa "+last_day+" "+last_month+" "+last_year);
+		}
+		
+	}
+	console.log(last_hours);
+	
+	var ill_values=[];
+	var drain = GetURLParameter("Illuminance", sessionStorage.getItem('url'));
+	console.log(drain);
+	//construisco la query
+	var query_ill = query_dwh + "SELECT%20[Measures].[Illuminance]%20ON%20COLUMNS,"
+	+ "%20CrossJoin([Location].["+drain+"]," + "%20([Time].["
+	+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
+	+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
+	
+	console.log(query_ill);
+	
+	//chiamata ajax per la query
+	$.ajax({
+		url : query_ill,
+		type : "GET",
+		dataType : "jsonp",
+		success : function(data){
+			console.log("ajax success");
+			var count = data.cells.length;
+			console.log(count);
+			for ( var i = 0; i < count; i++) {
+				ill_values[i] = roundtwo(data.cells[i].value);
+			}
+		},
+		error : function(xhr, ajaxOptions, thrownErrorxhr){
+			console.log(xhr.status);
+			console.log(thrownErrorxhr.message);
+		},
+		complete : function(){
+			//grafico
+			 var chart = new Highcharts.Chart({
+		         chart: {
+		             renderTo: 'grafico_i'
+		         },
+		         title: {
+		             text: 'Illuminance'
+		         },
+		         subtitle: {
+		             text: 'Last 6 hours'
+		         },
+		         xAxis: [{
+		             categories: last_hours
+		         }],
+		         yAxis: [{ // Primary yAxis
+		             labels: {
+		                 formatter: function() {
+		                     return this.value +'lx';
+		                 },
+		                 style: {
+		                     color: '#ffd70f'
+		                 }
+		             },
+		             title: {
+		                 text: 'Illuminance',
+		                 style: {
+		                     color: '#ffd70f'
+		                 }
+		             }
+		           
+		         }],
+		         tooltip: {
+		             shared: true
+		         },
+		         legend: {
+		             layout: 'horizontal',
+		             align: 'center',
+		             verticalAlign: 'top',
+		             y:40
+		         },
+		         series: [{
+		             name: 'Illuminance',
+		             color: '#ffd70f',
+		             type: 'spline',
+		             yAxis: 0,
+		             data: ill_values,
+		             tooltip: {
+		                 valueSuffix: ' lx'
+		             }
+		 
+		         }]
+		     });
+		}
+	});	
+});
+
+</script>
+<div class="grafico_ill">
+
+	<div id="grafico_i"></div>
+</div>
+

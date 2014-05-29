@@ -1,0 +1,140 @@
+<!-- ***************************************************************************
+*Copyright (c) 2014 Proxima Centauri srl <info@proxima-centauri.it>.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU Public License v3.0
+* which accompanies this distribution, and is available at
+* http://www.gnu.org/licenses/gpl.html
+*  
+* Contributors:
+*     Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
+**************************************************************************** -->
+
+<script type="text/javascript">
+
+var query_week;
+var week_chart;
+var last_week_values = new Array();
+
+var day_begin_last_week;
+var month_begin_last_week;
+var year_begin_last_week;
+
+var day_end_last_week;
+var month_end_last_week;
+var year_end_last_week;
+
+var drain;
+
+var url = sessionStorage.getItem('url');
+			
+drain=GetURLParameter("totalenergy", url);
+
+		
+//prendo data odierna con moment
+var today = moment();
+		
+
+
+		//creo un vettore con i 3 giorni precedenti ad oggi
+		var last_week = new Array(3);
+		var j = 1;
+
+		for ( var i = 2; i >= 0; i--) {
+			//sottraggo da today le i 3 giorni precedenti
+			var date = today.subtract('days', 1);
+			var dateString = date.date()+"/"+(date.month()+1); //piÃ¹ uno eprchÃ¨ i mesi iniziano da zero
+			console.log("gli ultimi tre giorni sono " +dateString);
+			//questo mi serve comunque per le categories
+			last_week[i] = dateString;
+			//qui mi servono data di inizio e fine della settimana per la query
+			if (j == 1) {
+				//memorizzo giorno mese e anno dell'ultimo giorno degli ultimi sette giorno
+				day_end_last_week = date.date();
+				month_end_last_week = date.month() + 1;
+				year_end_last_week = date.year();
+				console.log("j==1 " +day_end_last_week + " " + month_end_last_week + " " + year_end_last_week);
+			}
+			if (j == 3) {
+				//memorizzo giorno, mese e anno dell'inizio degli ultimi 7 giorni
+				day_begin_last_week = date.date();
+				month_begin_last_week = date.month() + 1;
+				year_begin_last_week = date.year();
+				console.log("j==3 " +day_begin_last_week + " " + month_begin_last_week + " " + year_begin_last_week);
+			}
+			j++;
+
+		}
+		
+		//check the place from session storage
+		var place = GetURLParameter('place', url);
+		
+		if(place=="verres"){
+			query_db = verres_query_db;
+			query_dwh = verres_query_dwh;
+		}
+		else if(place=="mirafiori"){
+			query_db = mirafiori_query_db;
+			query_dwh = mirafiori_query_dwh;
+		}
+		
+		query_week = build_interval_query_energy(drain, year_begin_last_week,month_begin_last_week, day_begin_last_week, null, null, year_end_last_week,month_end_last_week, day_end_last_week, null, null, false);					
+
+		console.log("query week " + query_week);
+
+		//chiamata ajax per il file json di esempio dei consumi dell'ultima settimana
+		$.ajax({
+			url : query_week,
+			type : "GET",
+			dataType : "jsonp",
+			success : function(data) {
+				last_week_values = parse_simple_data(data, 1000);
+			},
+			error : function(xhr, ajaxOptions, thrownErrorxhr) {
+				console.log(xhr.status);
+				console.log(thrownErrorxhr.message);
+				var scritta = $("<p class='errorMessage'>").text("Data are temporarily not available. Try to refresh the page.");
+				$("#week_chart").append(scritta);
+			},
+			complete : function(qXHR, textStatus) {
+				week_chart = new Highcharts.Chart({
+					chart : {
+						renderTo : 'week_chart',
+						type : 'column'
+					},
+					colors : [ '#FBAE17' ],
+					legend : {
+						enabled : false
+					},
+					title : {
+						text : "Energy Consumed",
+						style: {
+							fontSize:'1.2em'
+						}
+					},
+					subtitle: {
+			            text: 'Last Days'
+					},
+					xAxis : {
+						categories : last_week
+					},
+					yAxis : {
+						title : {
+							text : 'kW·h'
+						},
+						min : 0
+					},
+					series : [ {
+						name : 'Energy',
+						data : last_week_values
+					} ]
+
+				});
+			}
+		});
+</script>
+
+<div class="grafico_settimana">
+	<div id="week_chart">
+	
+	</div>
+</div>

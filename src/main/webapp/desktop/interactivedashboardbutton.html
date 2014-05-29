@@ -1,0 +1,39 @@
+<!-- ***************************************************************************
+*Copyright (c) 2014 Proxima Centauri srl <info@proxima-centauri.it>.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU Public License v3.0
+* which accompanies this distribution, and is available at
+* http://www.gnu.org/licenses/gpl.html
+*  
+* Contributors:
+*     Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
+**************************************************************************** -->
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		
+		var name= GetURLParameter("name");
+		var t= document.getElementById("btn_div").innerHTML;
+		
+		if(name=="server_farm"){
+			$("#btn_div").html("GO TO MEETING ROOM");
+		}else{
+			$("#btn_div").html("GO TO SERVER FARM");
+		}
+		
+		$(".buttondiv").click(function(){
+			//prendo tutti i dati del link corrente, così li passo alla dashboard interattiva
+			
+			if(name=="server_farm"){
+				window.location = "meetingRoom_clim.html"
+			}else{
+				window.location = "serverFarm_clim.html?name=server_farm"
+			}
+		});
+	});
+</script>
+
+<a class="buttondiv"> <div class="buttondiv" id="btn_div"> INTERACTIVE DATA </div></a>
+
+
+	

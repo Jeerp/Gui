@@ -1,0 +1,339 @@
+<!-- ***************************************************************************
+*Copyright (c) 2014 Proxima Centauri srl <info@proxima-centauri.it>.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU Public License v3.0
+* which accompanies this distribution, and is available at
+* http://www.gnu.org/licenses/gpl.html
+*  
+* Contributors:
+*     Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
+**************************************************************************** -->
+
+<!DOCTYPE html>
+<html ng-app>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="viewport" content="width=device-width">
+
+<link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
+<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+
+<!-- general js -->
+<script type="text/javascript" src="js/general.js"></script>
+<script type="text/javascript" src="js/new_general.js"></script>
+<script type="text/javascript" src="js/angular.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="css/style_clim.css">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+
+<script type="text/javascript">
+var flag=0;
+
+	$(document).ready(
+			function() {
+				$('button').button();
+				$("#back").click(function() {
+					window.location="energyManagement.html";
+				});
+				
+				var temp_in = "HVAC_MEETING_T";	
+					$("#temp-value").removeClass('invisible');
+					$("#temp-value").next().removeClass('invisible');	
+
+				var temp_out = "HVAC_OUTSIDE_T";
+					$("#umi-value").removeClass('invisible');
+					$("#umi-value").next().removeClass('invisible');
+				
+			
+				//temp	
+				var query_temp =  instant_query + temp_in;
+				execute_instant_query(query_temp, $("#temp-value"));
+
+				//umi 
+				var query_umi =  instant_query + temp_out;
+				execute_instant_query(query_umi, $("#umi-value"));
+
+				//interval per le query ogni 10 min 
+				setInterval( function() {
+								//temp
+								query_temp = instant_query+temp_in;
+								execute_instant_query(query_temp,$("#temp-value"));
+							
+								//umi 
+								query_umi = instant_query+temp_out;
+								execute_instant_query(query_umi,$("#umi-value"));							
+
+						}, 10000 * 60);  
+				
+				$("#button_on").click( function(){
+					var val= document.getElementById("active").value;
+					if(val==1){
+						var field = document.getElementById("aer-value1");
+						field.innerHTML="ON";
+					}
+					if(flag==0){
+						alert("This is only a demo! \nYou are not actually changing current conditions.");
+						flag++;
+					}
+				});
+				
+				$("#button_off").click( function(){
+					var val=document.getElementById("active").value;
+					if(val==1){
+						var field = document.getElementById("aer-value1");
+						field.innerHTML="OFF";
+					}
+					if(flag==0){
+						alert("This is only a demo! \nYou are not actually changing current conditions.");
+						flag++;
+					}
+				});
+				
+				$("#change").click( function(){
+					var val=document.getElementById("change").value;
+					if(val==1){
+						var field = document.getElementById("su");
+						var field2 = document.getElementById("giu");
+						var x;
+						if((field.disabled).toString()=="true"){
+							field.src="img/frecciasu.png";
+							field.disabled="";
+							field2.src="img/frecciagiu.png";
+							field2.disabled="";
+							x=$("#change").find(".ui-button-text").text("Confirm");
+							//$("#termostato").append(x);
+						}
+						else{
+							field.src="img/frecciasu_grey.png";
+							field.disabled="disabled";
+							field2.src="img/frecciagiu_grey.png";
+							field2.disabled="disabled";
+							x=$("#change").find(".ui-button-text").text("Change");
+							//$("#termostato").append(x);
+						}
+					}
+				});
+				
+				$("#su").click( function(){
+					var field = document.getElementById("aer-value2");
+					var fint= parseFloat(field.innerHTML);
+					var value=fint+0.5;
+					field.innerHTML=value;
+				});
+				
+				$("#giu").click( function(){
+					var field = document.getElementById("aer-value2");
+					var fint= parseFloat(field.innerHTML);
+					var value=fint-0.5;
+					field.innerHTML=value;
+				});
+				
+				$("#active").click( function(){
+					var val = document.getElementById("active");
+					var val2 = document.getElementById("inactive");
+					var field = document.getElementById("su");
+					var field2 = document.getElementById("giu");
+					var activ, inactive;
+					if(val.value==0){
+						activ = $("#active").find(".ui-button-text").text("Active");
+						val.style.background = "#99E31A";
+						val.value = "1";
+						inactive = $("#inactive").find(".ui-button-text").text("Click to activate!");
+						val2.style.background = "#FF5E00";
+						val2.value = "0";
+						var change=document.getElementById("change");
+						change.style.background = "#A4A4A4";
+						change.value="0";
+						change.disabled="disabled";
+						document.getElementById("button_off").src = "img/off.png";
+						document.getElementById("button_on").src = "img/on.png";
+						document.getElementById("button_off").disabled="";
+						document.getElementById("button_on").disabled="";
+						field.src="img/frecciasu_grey.png";
+						field2.src="img/frecciagiu_grey.png";
+						field.disabled="disabled";
+						field2.disabled="disabled";
+					}
+					if(flag==0){
+						alert("This is only a demo! \nYou are not actually changing current conditions.");
+						flag++;
+					}
+				});
+				
+				$("#inactive").click( function(){
+					var val = document.getElementById("inactive");
+					var val2 = document.getElementById("active");
+					var activ, inactive;
+					if(val.value==0){
+						activ = $("#inactive").find(".ui-button-text").text("Active");
+						val.style.background = "#99E31A";
+						val.value = "1";
+						inactive = $("#active").find(".ui-button-text").text("Click to activate!");
+						val2.style.background = "#FF5E00";
+						val2.value = "0";
+						var change=document.getElementById("change");
+						change.disabled="";
+						change.style.background = "#99E31A";
+						change.value="1";
+						document.getElementById("button_off").src = "img/disabled.png";
+						document.getElementById("button_on").src = "img/on_disabled.png";
+						document.getElementById("button_off").disabled="disabled";
+						document.getElementById("button_on").disabled="disabled";
+						if(flag==0){
+							alert("This is only a demo! \nYou are not actually changing current conditions.");
+							flag++;
+						}
+					}
+				});
+				
+				$("#loginbutton").attr('src', "'interactivedashboardbutton.html'");
+				
+			});
+	
+</script>
+
+<title>Jeerp</title>
+</head>
+<body>
+
+
+	<!-- racchiudo tutto in un div application -->
+
+	<div class="application">
+
+		<div class="intestazione">
+			<!-- aggiungo il bottone per aprire il pannello di navigazione  -->
+			<button id="back">Back to Energy Management</button>
+			<div ng-include src="'nomeAula.html'">Meeting Room</div>
+			<div ng-include src="'data.html'"></div>
+			<div id="loginbutton" ng-include></div>
+		</div>
+
+		<div class="left_container_big_up_plus">
+
+			<div ng-include src="'graficoTempUmiCO2.html'"></div>
+
+		</div>
+
+
+		<div class="right_container_small_up_plus">
+
+			<div class="right_container_inside_up_plus_meet">
+
+				<div class="sottotitolo">Current Indoor Temperature</div>
+				<div class="content_meet">
+					<div class="content_img">
+						<img class="logo" src="img/term_gui2.png" alt="logo_temp" />
+					</div>
+
+					<div class="value" style="font-size:large;">
+						<span id="temp-value">--</span> <span> °C</span> <span
+							id="temp-value-1" class='invisible'>--</span> <span
+							class='invisible'> °C</span> <br> <span id="temp-value-2"
+							class='invisible'>--</span> <span class='invisible'> °C</span> <br>
+						<span id="temp-value-3" class='invisible'>--</span> <span
+							class='invisible'> °C</span> <br>
+					</div>
+				</div>
+
+			</div>
+			
+			<div class="right_container_inside_up_plus_meet" style="margin-top:20%;">
+
+				<div class="sottotitolo">Current Outdoor Temperature</div>
+				<div class="content_meet">
+					<div class="content_img">
+						<img class="logo" src="img/term_gui2.png" alt="logo_temp" />
+					</div>
+
+					<div class="value" style="font-size:large;">
+						<span id="umi-value">--</span> <span> °C</span> <span
+							id="umi-value-1" class='invisible'>--</span> <span
+							class='invisible'> °C</span> <br> <span id="umi-value-2"
+							class='invisible'>--</span> <span class='invisible'> °C</span> <br>
+						<span id="umi-value-3" class='invisible'>--</span> <span
+							class='invisible'> °C</span> <br>
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+
+		<div class="left_container_big_bottom_less">
+
+			<div class="left_bottom_container">
+				<div class="central" id="content-aerazione">
+					<div class="sottotitolo">Manual Regulation
+						<button class="activate_button" id="active" value="1" style="background:#99E31A;">Active</button>
+						</div>
+					<div class="content">
+						<div class="content_img" style="width:24%;">
+							<img class="logo_piccolo" src="img/radiatore.png" alt="logo_aer" />
+						</div>
+
+						<div class="value bottom" style="font-size:large; padding-left:40px;">
+								<span> Valves: </span> <span id="aer-value1"> ON </span>
+							<div class="but_on-off" style="width:110px; margin-top:10px;">
+								<input id="button_on" type="image" src="img/on.png" name="on" style="width:49%; float:left;">
+								<input id="button_off" type="image" src="img/off.png" name="off" style="width:49%; float:right;">
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="right_bottom_container">
+				<div class="central" id="content-aerazione">
+					<div class="sottotitolo">Automatic Regulation
+						<button class="activate_button" id="inactive" value="0" style="background:#FF5E00;">Click to activate!</button>
+						</div>
+					<div class="content">
+						<div class="content_img">
+							<img class="logo_piccolo" src="img/termostato.png" alt="logo_aer"/>
+						</div>
+
+						<div class="value bottom" style="font-size:large;">
+								<div style="float:left; margin-top:35px; display:inline-flex;"><span> Set Temperature: </span> 
+								<div style="width:75px; margin-left:10px;"><span id="aer-value2"> 23 </span><span> °C </span></div></div>
+							
+								<div id="frecce" style="height:100px; width:40px; float:left;">
+									<input id="su" name="freccia_su" type="image" src="img/frecciasu_grey.png" alt="su" height="40%" style="margin-bottom:10px;" disabled="disabled">
+									<input id="giu" name="freccia_giu" type="image" src="img/frecciagiu_grey.png" alt="giu" height="40%" disabled="disabled">
+								</div>
+								<div id="termostato" style="width:200px;"><button id="change" value="0">Change</button> </div>
+								<!--  -->
+							</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+</body>
+
+
+<!-- script jquery -->
+
+<script type="text/javascript" src="js/jquery-ui-1.10.2.custom.min.js"></script>
+<!-- script highcharts -->
+<script type="text/javascript" src="js/highcharts.js"></script>
+<!-- script highstock -->
+<script type="text/javascript" src="js/highstock.js"></script>
+<!-- script highcharts more -->
+<script type="text/javascript" src="js/highcharts-more.js"></script>
+<!--  Custom theme -->
+<script type="text/javascript" src="js/chart.theme.js"></script>
+<!--  script angular js-->
+<script type="text/javascript" src="js/angular.min.js"></script>
+
+
+<!-- date js -->
+<script type="text/javascript" src="js/moment.min.js"></script>
+<script type="text/javascript" src="js/it.js"></script>
+
+</html>

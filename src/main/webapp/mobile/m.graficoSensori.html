@@ -1,0 +1,237 @@
+<!-- ***************************************************************************
+*Copyright (c) 2014 Proxima Centauri srl <info@proxima-centauri.it>.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU Public License v3.0
+* which accompanies this distribution, and is available at
+* http://www.gnu.org/licenses/gpl.html
+*  
+* Contributors:
+*     Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
+**************************************************************************** -->
+
+<script type="text/javascript" src="js/getFirstDate.js"> </script>
+<script type="text/javascript" src="js/month.js"> </script>
+<script type="text/javascript" src="js/sensorname.js"></script>
+<script >
+var num_axes=0;
+var chart_sens;
+var sensoriarray;
+var current_hour;
+var factor;
+$(document).ready(function() {
+	
+	//prendo i sensori
+	//alert('session storage ' + sessionStorage.getItem('url'));
+	//check the place from session storage
+	var place = GetURLParameter('place', sessionStorage.getItem('url'));
+	console.log(place);
+	
+	if(place=="verres"){
+		query_db = verres_query_db;
+		query_dwh = verres_query_dwh;
+	}
+	else if(place=="mirafiori"){
+		query_db = mirafiori_query_db;
+		query_dwh = mirafiori_query_dwh;
+	}
+	
+	var sensori = GetURLParameter('energy', sessionStorage.getItem('url'));
+	
+	sensoriarray = sensori.split("|");
+	
+
+	//prendo la data
+	var currentDate = moment();
+	
+	var anno = currentDate.year();
+	var mese = currentDate.month()+1;
+	var giorno = currentDate.date();
+	//prendo anche l'ora corrente
+	current_hour = currentDate.hour();
+	//alert(anno+" "+mese+" "+giorno);
+
+	//devo prendere anno, mese, giorno di 14 giorni fa 
+	var lastMonthBegin = currentDate.subtract('days', 14);
+	var lastanno = lastMonthBegin.year();
+	var lastmese = lastMonthBegin.month()+1;
+	var lastgiorno = lastMonthBegin.date();
+	
+	doGraph(lastanno, lastmese, lastgiorno, anno, mese, giorno);
+	$("#graficoSensori").click(function(){
+		alert('click');	
+	});
+});
+
+function doGraph(lastanno, lastmese, lastgiorno, anno, mese, giorno){
+
+	//voglio svuotare il div con il grafico, così si campisce che sto caricando qualcosa
+	
+	$("#graficoSensori").text("Loading data...");
+	
+	//construisco la query del totale
+	var tot_sen = GetURLParameter("totalenergy", sessionStorage.getItem('url'));
+	var query_tot = build_interval_query_energy(tot_sen,lastanno, lastmese,lastgiorno,0,0,anno,mese,giorno,current_hour,0,true);
+	factor=2;
+
+	console.log("query tot "+query_tot);
+	
+	var time_value_array_tot = new Array();
+	
+	//query totale
+	$.ajax({
+	url : query_tot,
+	dataType: 'jsonp',
+	error: function(x, t, r){
+		var scritta = $("<p class='errorMessage'>").text("Data are temporarily not available. Try to refresh the page");
+		$("#graficoSensori").append(scritta); 
+	},
+	success:function(data){
+		console.log("oh yeah, what a success");
+		console.log(data);
+		if(typeof data.axes === 'undefined'){
+			var scritta = $("<p class='errorMessage'>").text("Data are temporarily not available. Try to refresh the page");
+			$("#graficoSensori").append(scritta); 
+			return;
+		}
+		time_value_array_tot = parse_time_value_data(data, 1000);
+	},
+	complete: function (qXHR, textStatus) {
+		//creo il grafico 
+		//alert("creo il grafico");
+		$("#graficoSensori").empty();
+		chart_sen = new Highcharts.StockChart({
+			chart: {
+		    	renderTo: 'graficoSensori',
+		        alignTicks: false
+		    },
+		    colors: [
+		             '#2f7ed8', 
+		             '#CC1100', 
+		             '#8bbc21', 
+		             '#910000', 
+		             '#1aadce', 
+		             '#492970',
+		             '#f28f43', 
+		             '#77a1e5', 
+		             '#c42525', 
+		             '#a6c96a'
+		          ],
+		    legend: {
+		    	align : 'center',
+				layout : 'horizontal',
+				verticalAlign : 'top',
+				y:40,
+				enabled:true
+		    },
+		    title: {
+		        text: 'Average power per sensor (kW)'
+		    },
+		    rangeSelector: {
+		        buttons: [{
+		            type: 'day',
+		            count: 1,
+		            text: '1d'
+		        }, {
+		            type: 'day',
+		            count: 3,
+		            text: '3d'
+		        },{
+		            type: 'week',
+		            count: 1,
+		            text: '1w'
+		        }, {
+		            type: 'all',
+		            text: 'All'
+		        }],
+		    	labelStyle: {
+		    		color: 'silver',
+		    		fontWeight: 'bold'
+		    	},
+		    	inputStyle: {
+		    		color: 'silver'
+		    	},
+		        selected: 1
+		    },
+		    series: [{
+		    	type: 'spline',
+		        name: 'Total',
+		        data: time_value_array_tot,
+		         dataGrouping: {
+		    	   dateTimeLabelFormats: {
+		    		   day: ['%A, %b %e, %Y', '%A, %b %e', '-%A, %b %e, %Y'],
+		    		   week: ['Week from %A, %b %e, %Y', '%A, %b %e', '-%A, %b %e, %Y'],
+		    		   month: ['%B %Y', '%B', '-%B %Y'],
+		    		   year: ['%Y', '%Y', '-%Y']
+		    	   },
+					units: [[
+					    'day',
+					    [1]
+					],[
+						'week', // unit name
+						[1] // allowed multiples
+					], [
+						'month',
+						[1, 2, 3]
+					]]
+		        } 
+		    }],
+		    yAxis : {
+		    	min : 0
+		    }
+		});
+		
+		//uso closure function altirmenti i risultati delle richieste ajax accodate si sovrascivevano!
+		var result = [];
+		var i;
+		if(sensoriarray.length>1){
+			for (i = 0; i < sensoriarray.length; i++)
+			{
+				
+			  (function(i)
+				 {
+				  var time_value_array = new Array();
+					var sens = sensoriarray[i];
+					query_sens =  build_interval_query_energy(sens,lastanno, lastmese,lastgiorno,0,0,anno,mese,giorno,current_hour,0,true);
+					factor=2;
+					
+			     $.ajax({
+			          url: query_sens,
+			          dataType:'jsonp',
+			          success: function(data) {
+			        	  if(typeof data.axes === 'undefined'){
+			      			var scritta = $("<p class='errorMessage'>").text("Il server non è al momento raggiungibile. Prova a ricaricare la pagina");
+			      			$("#graficoSensori").append(scritta); 
+			      			return;
+			      		}
+			        	  time_value_array = parse_time_value_data(data, 1000); 
+			          },
+			          complete: function (a, b){
+			        	  var nome = sensorname[sens];
+			        	  result[i]=time_value_array;
+			        	  chart_sen.addSeries({
+			      			name: nome,
+			      			data: result[i]
+			      		});
+			        	  
+			          }
+			        });  
+			    })(i); 
+			}
+		}
+		
+		
+	}
+});
+}
+
+
+
+
+
+
+</script>
+
+<div id="graficoSensoriContenitore">
+
+<div id="graficoSensori"></div>
+</div>

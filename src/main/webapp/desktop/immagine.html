@@ -1,0 +1,33 @@
+<!-- ***************************************************************************
+*Copyright (c) 2014 Proxima Centauri srl <info@proxima-centauri.it>.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU Public License v3.0
+* which accompanies this distribution, and is available at
+* http://www.gnu.org/licenses/gpl.html
+*  
+* Contributors:
+*     Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
+**************************************************************************** -->
+
+<script type="text/javascript">
+var h; 
+var padding_top;
+var div_h;
+	$().ready(function(){
+		//anche l'altezza del div la prendo programmaticamente,
+		//cos� il codice vale per qualsiasi altezza
+		div_h = $("#div_immagine").height();
+		$("#foto").load(function() {
+	       	h = $(this).height();
+	       	padding_top = (div_h-h)/2;
+	       	console.log(padding_top);
+	       	$("#foto").css('padding-top', padding_top);
+	    });
+		
+		$("#foto").attr('src','img/logo.png');
+	});
+</script>
+
+<div id="div_immagine">
+	<img id="foto" src="" alt="foto descrittiva"/>
+</div>
