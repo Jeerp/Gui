@@ -25,6 +25,8 @@
 <link rel="stylesheet" type="text/css" href="css/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="css/style.css"> 
 
+<!-- configuration -->
+<script type="text/javascript" src="js/config.js"></script>
 
 <!--  script angular js-->
 <script type="text/javascript" src="js/angular.min.js"></script>
@@ -47,7 +49,7 @@
 
 <!-- general js -->
 <script type="text/javascript" src="js/general.js"></script>
-
+<script type="text/javascript" src="js/new_general.js"></script>
 
 <script type="text/javascript">
 	var smart = false;
@@ -72,6 +74,31 @@
 		loadcss('css/style.css');
 		smart = false;
 	} 
+	 $(document).ready(function(){
+			var place=GetURLParameter('name');
+				if(name!="Total%20Building"){
+					$(".intestazione").prepend($("<button>").attr('id','backto_parent').text('Back to Parent Node'));
+				}
+				$(".intestazione").prepend($("<button>").attr('id','home').text('Back to Tree'));
+				$("#panelbutton").remove();
+				$("#home").click(function(){
+					window.location="mappaSensori.html?power=M500-P|DRAIN-TPE|DRAIN_OFFICE|M1-P1|M1-P2|M1-P3|M2-P1|M2-P2|M2-P3";
+				});
+				$("#backto_parent").click(function(){
+					switch(place){
+					case "Server%20Farm":
+						window.location="interactivedashboard.html?name=Total%20Building&totalpower=M500-P&totalenergy=M500-P&power=DRAIN-TPE|DRAIN_OFFICE&energy=DRAIN-TPE";
+						break;
+					case "Office":
+						window.location="interactivedashboard.html?name=Total%20Building&totalpower=M500-P&totalenergy=M500-P&power=DRAIN-TPE|DRAIN_OFFICE&energy=DRAIN-TPE";
+						break;
+					default:
+						window.location="interactivedashboard.html?name=Server%20Farm&totalpower=DRAIN-TPE&totalenergy=DRAIN-TPE&power=M1-P1|M1-P2|M1-P3|M2-P1|M2-P2|M2-P3&energy=M1-P1|M1-P2|M1-P3|M2-P1|M2-P2|M2-P3";
+						break;
+					}
+				});
+		});
+	 
 </script>
 
 
@@ -82,27 +109,27 @@
 	<!-- racchiudo tutto in un div application -->
 
 	<div class="application">
-			
-			<div ng-include src="'refreshbutton.html'"></div>
+			<div class="intestazione">
+				<div ng-include src="'refreshbutton.html'"></div>
+	
+	
+				<div ng-include src="'nomeAula.html'"></div>
+				<div ng-include src="'data.html'"></div>
+				<div id="dashboardbutton" ng-include></div>
+				<script>
+					if (smart == false) {
+						var name= GetURLParameter("name");
+						var totalenergy = GetURLParameter("totalenergy");
+						var totalpower = GetURLParameter("totalpower");
+						var energy = GetURLParameter("energy");
+						var power = GetURLParameter("power");
+						var place = GetURLParameter("place");
+					
+						$("#dashboardbutton").attr('src', "'dashboardbutton.html?name="+name+"&totalpower="+totalpower+"&totalenergy="+totalenergy+"&power="+power+"&energy="+energy+"&place="+place+"'");
+					}
+				</script>
 
-
-			<div ng-include src="'nomeAula.html'"></div>
-			<div ng-include src="'data.html'"></div>
-			<div id="dashboardbutton" ng-include></div>
-			<script>
-				if (smart == false) {
-					var name= GetURLParameter("name");
-					var totalenergy = GetURLParameter("totalenergy");
-					var totalpower = GetURLParameter("totalpower");
-					var energy = GetURLParameter("energy");
-					var power = GetURLParameter("power");
-					var place = GetURLParameter("place");
-				
-					$("#dashboardbutton").attr('src', "'dashboardbutton.html?name="+name+"&totalpower="+totalpower+"&totalenergy="+totalenergy+"&power="+power+"&energy="+energy+"&place="+place+"'");
-				}
-			</script>
-
-
+		</div>
 		<div class="container_1">
 			<div ng-include src="'graficoSensori.html'"></div>
 			<div ng-include src="'graficoIstantaneo.html'"></div>

@@ -1,0 +1,16 @@
+<script type="text/javascript">
+
+$(document).ready(function(){
+	var name = GetURLParameter('name');
+	var total_energy =  GetURLParameter('totalenergy');
+	var total_power = GetURLParameter('totalpower');
+	var power = GetURLParameter('power');
+	var energy = GetURLParameter('energy');
+	
+	$("#interactive_data").click(function(){
+		window.location="interactivedashboard.html?name="+name+"&totalenergy="+total_energy+"&totalpower="+total_power+"&energy="+energy+"&power="+power;
+	});
+});
+
+</script>
+<a class="buttondiv"> <div class="buttondiv" id="interactive_data"> INTERACTIVE DATA </div></a>

@@ -18,7 +18,7 @@
 		//prendo dei sensori dall'url 
 		//cioè power 
 		var sensori = GetURLParameter('power'); 
-		if(typeof sensori !="undefined"){
+		if(typeof sensori !="undefined" && sensori!='undefined'){
 			var sensoriarray = sensori.split('|');
 			
 			var initial_value=[];
@@ -73,23 +73,35 @@
 				var p = $("<p>Nessun sensore figlio</p>").appendTo($("#valori"));
 			}
 			
-			$("button").click( function(){
+			$("button.sensori").click( function(){
+				//devo capire se sono in interactive o no 
+				var url = window.location.pathname;
+				
+				console.log(url);
+				
 				var sens = this.id;
+				console.log(sens);
 				var len = sens.length;
 				sens = sens.substring(0,len-1);
+				console.log(sens);
 				var sens_name = document.getElementById(sens).textContent;
+				console.log(sens_name);
+				
 				len=(sens_name.length)-2;
 				sens_name= (sens_name.substring(0,len)).toLowerCase();
 				sens_name=((sens_name.substring(0,1)).toUpperCase())+(sens_name.substring(1,len)); //pone la prima lettera maiuscola
-				if(sens_name=='Server farm'){
-					location.href='dashboard.html?name=Server%20Farm&totalpower=DRAIN-TPE&totalenergy=DRAIN-TPE&power=M1-P1|M1-P2|M1-P3|M2-P1|M2-P2|M2-P3&energy=M1-P1|M1-P2|M1-P3|M2-P1|M2-P2|M2-P3';
+				console.log(sens_name);
+				
+				 if(sens_name=='Server farm'){
+					location.href= url+'?name=Server%20Farm&totalpower=DRAIN-TPE&totalenergy=DRAIN-TPE&power=M1-P1|M1-P2|M1-P3|M2-P1|M2-P2|M2-P3&energy=M1-P1|M1-P2|M1-P3|M2-P1|M2-P2|M2-P3';
 				}else if(sens_name=='A.c. 1'){
-					location.href='dashboard.html?name=Air%20Conditioner%20-%20Daikin&totalpower=M2-P2&totalenergy=M2-P2';
+					location.href=url+'?name=Air%20Conditioner%20-%20Daikin&totalpower=M2-P2&totalenergy=M2-P2';
 				}else if(sens_name=='A.c. 2'){
-					location.href='dashboard.html?name=Air%20Conditioner%20-%20Eca%20Technology&totalpower=M2-P3&totalenergy=M2-P3';
+					location.href=url+'?name=Air%20Conditioner%20-%20Eca%20Technology&totalpower=M2-P3&totalenergy=M2-P3';
 				}else{
-						location.href='dashboard.html?name='+sens_name+'&totalpower='+sens+'&totalenergy='+sens;
-				}});
+					location.href=url+'?name='+sens_name+'&totalpower='+sens+'&totalenergy='+sens;
+				} 
+				}); 
 		}else{
 			
 			var p = $("<p>No children</p>").appendTo($("#valori"));

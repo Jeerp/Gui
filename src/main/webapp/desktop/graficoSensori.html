@@ -43,7 +43,12 @@ $(document).ready(function() {
 	
 	//prendo i sensori di energia dall'url 
 	var sensori = GetURLParameter("energy");
-	sensoriarray = sensori.split("|");
+	console.log('sensori -->');
+	console.log(sensori);
+	if(typeof sensori !='undefined'){
+		sensoriarray = sensori.split("|");
+	}
+	
 	
 	//prendo la data
 	var currentDate = moment();

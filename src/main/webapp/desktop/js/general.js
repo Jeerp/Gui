@@ -9,11 +9,11 @@
 *      Proxima Centauri srl <info@proxima-centauri.it> - initial API and implementation
 *******************************************************************************/
 
-var jeerp_query_db = "/JeerpDa/viewer/measure/";
+var jeerp_query_db = serverAddress+"/JeerpDa/viewer/measure/";
 
-var instant_query= "/JeerpDa/measure/instants/";
-var minute_query="/JeerpDa/measure/details/";
-var week_query="/JeerpDa/measure/history/";
+var instant_query= serverAddress+"/JeerpDa/measure/instants/";
+var minute_query= serverAddress+"/JeerpDa/measure/details/";
+var week_query= serverAddress+"/JeerpDa/measure/history/";
 
 //cubo a cui fare le interrogazioni
 var cube ="[Electric]";
@@ -44,7 +44,7 @@ function GetURLParameter(sParam) {
 
 //funzione per conversione da stringa a data utc
 function convertFromStringToUTCDate (dateString){
-	var date_array = dateString.split('|');
+	var date_array = dateString.split('-');
 	
 	//console.log(date_array);
 	if(date_array.length==3){
@@ -118,6 +118,55 @@ function parse_simple_data(data, scale){
 		vector[i] = round(data.measures[i].value/scale);
 	}
 	return vector;
+}
+/* funzione per parsare i dati, mi restituisce con le value*/
+/**
+ * now -> per non caricare dati superiore alla data attuale
+ * scale --> cambiare ordine di grandezza del dato
+ * 
+ * */
+function parse_time_value_data(data, scale, factor){
+	if(typeof factor==='undefined'){
+		factor=1;
+	}
+	
+	
+	var time_value_array = new Array();
+	//prendo name e position di data.axes
+	//console.log("NUM AXES-->  ");
+	
+	var num_axes = data.measures.length;
+	console.log(num_axes);
+	//get the current day
+	var now = moment().valueOf();
+	now = fromTimestampToUTC(now);
+	for(var i=0; i<num_axes-1; i++){
+		var obj = new Array();
+		//salto l'ultimo valor eperchè è sempre null
+		
+//		var time = convertFromStringToUTCDate(data.measures[i].time);
+//		console.log("TIME");
+//		console.log(time);
+//		if(time < now){
+			var val = (round(data.measures[i].value/scale))*factor;
+			console.log(val);
+			var time = moment(data.measures[i].time);
+			var tstamp = Date.UTC(time.year(), time.month(), time.date(), time.hour(), time.minute(), 0);
+			obj[0] = tstamp;
+			obj[1] = val;
+			
+			time_value_array.push(obj);
+			//time_value_array.push(val);
+//		}
+
+	}
+	
+	//faccio il sort
+	time_value_array.sort(compare);
+
+	
+	//return time_value_array;
+	return time_value_array;
 }
 
 //get a column from a matrix

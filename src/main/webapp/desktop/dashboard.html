@@ -20,6 +20,10 @@
 <script type="text/javascript" src="js/jquery-ui-1.10.2.custom.min.js"></script>
 
 <script type="text/javascript" src="js/jquery.cookie.js"></script>
+
+<!-- configuration -->
+<script type="text/javascript" src="js/config.js"></script>
+
 <!--  script angular js-->
 <script type="text/javascript" src="js/angular.min.js"></script>
 
@@ -101,7 +105,8 @@
 
 			<div ng-include src="'nomeAula.html'"></div>
 			<div ng-include src="'data.html'"></div>
-			<div id="loginbutton" ng-include></div>
+			<!-- <div id="loginbutton" ng-include></div>  -->
+			<div ng-include src="'interactivebutton.html'"></div> 
 			<script>
 				if (smart == false) {
 					var name= GetURLParameter("name");
@@ -126,7 +131,7 @@
 
 		<div class="container_1">
 			<div ng-include src="'graficoCentrale.html'"></div>
-			<!-- <div ng-include src="'linkApplicazione.html'"></div> -->
+			
 			<div ng-include src="'graficoIstantaneo.html'"></div>
 		</div>
 
