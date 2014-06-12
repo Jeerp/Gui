@@ -1,0 +1,287 @@
+[
+    {
+        "id": "TE",
+        "name": "Building Total",
+        "description": "Contatore Generale",
+        "children": [
+            {
+                "id": "SF",
+                "name": "Server Farm",
+                "description": "",
+                "children": [
+                    {
+                        "id": "Rack1",
+                        "name": "Rack1",
+                        "description": "",
+                        "drains": [
+                            {
+                                "id": "M1-P1",
+                                "name": "M1-P1",
+                                "description": "",
+                                "total": true,
+                                "type": "ActivePower"
+                            },
+                            {
+                                "id": "M1-P1",
+                                "name": "M1-P1",
+                                "description": "",
+                                "total": true,
+                                "type": "ActiveEnergy"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "Rack2",
+                        "name": "Rack2",
+                        "description": "",
+                        "drains": [
+                            {
+                                "id": "M1-P2",
+                                "name": "M1-P2",
+                                "description": "",
+                                "total": true,
+                                "type": "ActivePower"
+                            },
+                            {
+                                "id": "M1-P2",
+                                "name": "M1-P2",
+                                "description": "",
+                                "total": true,
+                                "type": "ActiveEnergy"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "Rack3",
+                        "name": "Rack3",
+                        "description": "",
+                        "drains": [
+                            {
+                                "id": "M1-P3",
+                                "name": "M1-P3",
+                                "description": "",
+                                "total": true,
+                                "type": "ActivePower"
+                            },
+                            {
+                                "id": "M1-P3",
+                                "name": "M1-P3",
+                                "description": "",
+                                "total": true,
+                                "type": "ActiveEnergy"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "Auxiliary",
+                        "name": "Auxiliary",
+                        "description": "",
+                        "drains": [
+                            {
+                                "id": "M2-P1",
+                                "name": "M2-P1",
+                                "description": "",
+                                "total": true,
+                                "type": "ActivePower"
+                            },
+                            {
+                                "id": "M2-P1",
+                                "name": "M2-P1",
+                                "description": "",
+                                "total": true,
+                                "type": "ActiveEnergy"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "A.C.1",
+                        "name": "A.C.1",
+                        "description": "",
+                        "drains": [
+                            {
+                                "id": "M2-P2",
+                                "name": "M2-P2",
+                                "description": "",
+                                "total": true,
+                                "type": "ActivePower"
+                            },
+                            {
+                                "id": "M2-P2",
+                                "name": "M2-P2",
+                                "description": "",
+                                "total": true,
+                                "type": "ActiveEnergy"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "A.C.2",
+                        "name": "A.C.2",
+                        "description": "",
+                        "drains": [
+                            {
+                                "id": "M2-P3",
+                                "name": "M2-P3",
+                                "description": "",
+                                "total": true,
+                                "type": "ActivePower"
+                            },
+                            {
+                                "id": "M2-P3",
+                                "name": "M2-P3",
+                                "description": "",
+                                "total": true,
+                                "type": "ActiveEnergy"
+                            }
+                        ]
+                    }
+                ],
+                "drains": [
+                    {
+                        "id": "DRAIN-TPE",
+                        "name": "DRAIN-TPE",
+                        "description": "",
+                        "total": true,
+                        "type": "ActivePower"
+                    },
+                    {
+                        "id": "DRAIN-TPE",
+                        "name": "DRAIN-TPE",
+                        "description": "",
+                        "total": true,
+                        "type": "ActiveEnergy"
+                    },
+                    {
+                        "id": "M1-P1",
+                        "name": "M1-P1",
+                        "description": "",
+                        "total": false,
+                        "type": "ActivePower"
+                    },
+                    {
+                        "id": "M1-P1",
+                        "name": "M1-P1",
+                        "description": "",
+                        "total": false,
+                        "type": "ActiveEnergy"
+                    },
+                    {
+                        "id": "M1-P2",
+                        "name": "M1-P2",
+                        "description": "",
+                        "total": false,
+                        "type": "ActivePower"
+                    },
+                    {
+                        "id": "M1-P2",
+                        "name": "M1-P2",
+                        "description": "",
+                        "total": false,
+                        "type": "ActiveEnergy"
+                    },
+                    {
+                        "id": "M1-P3",
+                        "name": "M1-P3",
+                        "description": "",
+                        "total": false,
+                        "type": "ActivePower"
+                    },
+                    {
+                        "id": "M1-P3",
+                        "name": "M1-P3",
+                        "description": "",
+                        "total": false,
+                        "type": "ActiveEnergy"
+                    },
+                    {
+                        "id": "M2-P1",
+                        "name": "M2-P1",
+                        "description": "",
+                        "total": false,
+                        "type": "ActivePower"
+                    },
+                    {
+                        "id": "M2-P1",
+                        "name": "M2-P1",
+                        "description": "",
+                        "total": false,
+                        "type": "ActiveEnergy"
+                    },
+                    {
+                        "id": "M2-P2",
+                        "name": "M2-P2",
+                        "description": "",
+                        "total": false,
+                        "type": "ActivePower"
+                    },
+                    {
+                        "id": "M2-P3",
+                        "name": "M2-P3",
+                        "description": "",
+                        "total": false,
+                        "type": "ActiveEnergy"
+                    },
+                    {
+                        "id": "M2-P3",
+                        "name": "M2-P3",
+                        "description": "",
+                        "total": false,
+                        "type": "ActivePower"
+                    },
+                    {
+                        "id": "M2-P3",
+                        "name": "M2-P3",
+                        "description": "",
+                        "total": false,
+                        "type": "ActiveEnergy"
+                    }
+                ]
+            },
+            {
+                "id": "OFF",
+                "name": "Office",
+                "description": "Office",
+                "children": [],
+                "drains": [
+                    {
+                        "id": "DRAIN_OFFICE",
+                        "name": "DRAIN_OFFICE",
+                        "description": "",
+                        "total": true,
+                        "type": "ActivePower"
+                    },
+                    {
+                        "id": "DRAIN_OFFICE",
+                        "name": "DRAIN_OFFICE",
+                        "description": "",
+                        "total": true,
+                        "type": "ActiveEnergy"
+                    }
+                ]
+            }
+        ],
+        "drains": [
+            {
+                "id": "M500-P",
+                "name": "M500-P",
+                "description": "transformer 1 energy",
+                "total": true,
+                "type": "ActiveEnergy"
+            },
+            {
+                "id": "DRAIN_OFFICE",
+                "name": "Office",
+                "description": "transformer 1 energy",
+                "total": false,
+                "type": "ActiveEnergy"
+            },
+            {
+                "id": "DRAIN-TPE",
+                "name": "Server Farm",
+                "description": "transformer 1 energy",
+                "total": false,
+                "type": "ActiveEnergy"
+            }
+        ]
+    }
+]

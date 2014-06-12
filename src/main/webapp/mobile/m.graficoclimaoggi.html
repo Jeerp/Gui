@@ -20,606 +20,59 @@ $(document).ready(function(){
 	var month = today.month() +1; //perch� il mese parte da zero
 	var year = today.year();
 	//devo prendere l'ora corrente
-	var current_hour = moment().hour();
-	
-	console.log(day+" "+ month +" "+year+" "+current_hour);
+	var hour = (today.subtract('hour', 1)).hour();
 	
 	var temp_values = [];
-	var temp_values_1 = [];
-	var temp_values_2 = [];
-	var temp_values_3 = [];
+	var temp_values_out = [];
 	
-	var umi_values = [];
-	var umi_values_1 = [];
-	var umi_values_2 = [];
-	var umi_values_3 = [];
+
+
+	var point_interval = 3600 * 1000; //one hour 
 	
-	var co2_values = [];
-	var co2_values_1 = [];
-	var co2_values_2 = [];
-	var co2_values_3 = [];
-
-
-	var last_hours=[];
-
-	//prendo le ultime sei ore 	
-	for(var i = 5; i >= 0; i--){
-		console.log('nel for');
-		last_hours[i]=today.subtract('hour', 1).hour();
-		if(i==0){
-			console.log(i);
-			last_day = (today.subtract('hour', 1)).date();
-			last_month=(today.subtract('hour', 1)).month()+1;
-			last_year=(today.subtract('hour', 1)).year();
-			console.log("tadaaa "+last_day+" "+last_month+" "+last_year);
-		}
+	//se sono a mezzanotte, non devo cambiare giorno precedente (cioè le 23 di hour dato che ho sottratto 1)
+	var last_hour;
+	if(hour == 23){
+		last_day = day;
+		last_month = month;
+		last_year= year;
+		
+		last_hour = moment().subtract('hour', 6).hour();
+		
+		
 	}
-	
-	console.log(last_hours);
+	else{
+		var last = moment().subtract('hour', 6);
+		last_day = last.date();
+		last_month=last.month()+1;
+		last_year=last.year();
+		last_hour = last.hour();
+	}
 	
 	//devo prendere il parametro dall'url
 	var url = sessionStorage.getItem('url');
-	var place = GetURLParameter("place", sessionStorage.getItem('url'));
-	if(place=="verres") {
-		query_dwh = verres_query_dwh;
-	}
-	else if(place=="mirafiori"){
-		query_dwh = mirafiori_query_dwh;
-	}
 	console.log(url);
 	var draint = GetURLParameter("Temperature", sessionStorage.getItem('url'));
-	var multiple_temp = false;
-	var draint_array = draint.split("|");
-	if(draint_array.length>1){
-		multiple_temp = true;
-	}
-	else{
-		multiple_temp = false;
-	}
+	var draintout = GetURLParameter("OutsideTemperature", sessionStorage.getItem('url'));
+	
 	console.log(draint);
+	console.log(draintout);
 	
-	var drainu = GetURLParameter("RelativeHumidity", sessionStorage.getItem('url'));
-	var multiple_umi = false;
-	var drainu_array = drainu.split("|");
-	if(drainu_array.length>1){
-		multiple_umi = true;
-	}
-	else{
-		multiple_umi = false;
-	}
-	console.log(drainu);
-	
-	var drainco2 = GetURLParameter("CO2",sessionStorage.getItem('url'));
-	var multiple_co2 = false;
-	var drainco2_array = drainco2.split("|");
-	if(drainco2_array.length>1){
-		multiple_co2 = true;
-	}
-	else{
-		multiple_co2 = false;
+	//time zone
+	var time_zone=moment().format("ZZ");
+	time_zone.toString();
+	var tz="%2B";
+	for(n=1;n<time_zone.length;n++){
+		tz=tz+time_zone[n];
 	}
 	
-	console.log(drainco2);
+	/*IERI*/
+	var yesterday=moment().subtract('hours', 6).format("YYYY-MM-DDTHH:mm:ss");
+	yesterday=yesterday+tz;
 
-	var query_temp;
-	var query_temp_1;
-	var query_temp_2;
-	var query_temp_3;
-	
-	var query_umi;
-	var query_umi_1;
-	var query_umi_2;
-	var query_umi_3;
-	
-	var query_co2;
-	var query_co2_2;
-	var query_co2_2;
-	var query_co2_3;
-	
-	//devo costruire le query
-	if(multiple_temp==false && multiple_umi==false && multiple_co2==false){
-		query_temp = query_dwh + "SELECT%20[Measures].[Temperature]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+draint+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
-		
-		query_umi = query_dwh + "SELECT%20[Measures].[Humidity]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+drainu+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
-		
-		query_co2 = query_dwh + "SELECT%20[Measures].[CO2]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+drainco2+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
-	}
-	else{
-		query_temp_1 = query_dwh + "SELECT%20[Measures].[Temperature]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+draint_array[0]+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
-		
-		query_temp_2 = query_dwh + "SELECT%20[Measures].[Temperature]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+draint_array[1]+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
-		
-		query_temp_3 = query_dwh + "SELECT%20[Measures].[Temperature]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+draint_array[2]+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
-		
-		query_umi_1 = query_dwh + "SELECT%20[Measures].[Humidity]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+drainu_array[0]+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
-		
-		query_umi_2 = query_dwh + "SELECT%20[Measures].[Humidity]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+drainu_array[1]+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
-		
-		query_umi_3 = query_dwh + "SELECT%20[Measures].[Humidity]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+drainu_array[2]+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
+	var query_temp =  week_query + draint + "?start=" + yesterday + "&timeAggregation=HOUR";
+	var query_temp_out = week_query + draintout + "?start=" + yesterday + "&timeAggregation=HOUR";
 
-		
-		query_co2_1 = query_dwh + "SELECT%20[Measures].[CO2]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+drainco2_array[0]+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
-		
-		query_co2_2 = query_dwh + "SELECT%20[Measures].[CO2]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+drainco2_array[1]+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
-		
-		query_co2_3 = query_dwh + "SELECT%20[Measures].[CO2]%20ON%20COLUMNS,"
-		+ "%20CrossJoin([Location].["+drainco2_array[2]+"]," + "%20([Time].["
-		+ last_year + "].[" + last_month + "].[" + last_day + "].["+last_hours[0]+"]:" + "[Time].[" + year
-		+ "].[" + month + "].[" + day + "].["+last_hours[5]+"]))%20ON%20ROWS%20FROM%20[Climatic]";
-		
-	}
-
-	if(multiple_temp==true){
-		$.ajax({
-			url : query_temp_1,
-			type : "GET",
-			dataType : "jsonp",
-			async : false,
-			success : function(data){
-				console.log('query temp success');
-				//devo salvare i dati nel vettore, come per grafico centrale
-				var count = data.cells.length;
-				console.log(count);
-				for ( var i = 0; i < count; i++) {
-					if(data.cells[i].value!=null){
-						temp_values_1[i] = parseFloat(data.cells[i].value);
-						temp_values_1[i] = roundtwo(temp_values_1[i]);
-					}
-					else{
-						temp_values_1[i]=null;
-					}
-				}
-			},
-			error : function(xhr, ajaxOptions, thrownErrorxhr){
-				console.log(xhr.status);
-				console.log(thrownErrorxhr.message);
-			},
-			complete: function(){
-				console.log('ajax complete');
-				$.ajax({
-					url : query_temp_2,
-					type : "GET",
-					dataType : "jsonp",
-					async : false,
-					success : function(data){
-						console.log('query temp success');
-						//devo salvare i dati nel vettore, come per grafico centrale
-						var count = data.cells.length;
-						console.log(count);
-						for ( var i = 0; i < count; i++) {
-							if(data.cells[i].value!=null){
-								temp_values_2[i] = parseFloat(data.cells[i].value);
-								temp_values_2[i] = roundtwo(temp_values_2[i]);
-							}
-							else{
-								temp_values_2[i]=null;
-							}
-						}
-					},
-					error : function(xhr, ajaxOptions, thrownErrorxhr){
-						console.log(xhr.status);
-						console.log(thrownErrorxhr.message);
-					},
-					complete: function(){
-						console.log('ajax complete');
-						$.ajax({
-							url : query_temp_3,
-							type : "GET",
-							dataType : "jsonp",
-							async : false,
-							success : function(data){
-								console.log('query temp success');
-								//devo salvare i dati nel vettore, come per grafico centrale
-								var count = data.cells.length;
-								console.log(count);
-								for ( var i = 0; i < count; i++) {
-									if(data.cells[i].value!=null){
-										temp_values_3[i] = parseFloat(data.cells[i].value);
-										temp_values_3[i] = roundtwo(temp_values_3[i]);
-									}
-									else{
-										temp_values_3[i]=null;
-									}
-								}
-							},
-							error : function(xhr, ajaxOptions, thrownErrorxhr){
-								console.log(xhr.status);
-								console.log(thrownErrorxhr.message);
-							},
-							complete: function(){
-								console.log('ajax complete');
-								//umi 1
-								$.ajax({
-									url: query_umi_1,
-									type : "GET",
-									dataType : "jsonp",
-									async : false,
-									error: function(xhr, ajaxOptions, thrownErrorxhr){
-										console.log(xhr.status);
-										console.log(thrownErrorxhr.message);
-									},
-									success: function(data){
-										console.log('query umi1 success');
-										//devo salvare i dati nel vettore, come per grafico centrale
-										var count = data.cells.length;
-										console.log(count);
-										for ( var i = 0; i < count; i++) {
-											if(data.cells[i].value!=null){
-												umi_values_1[i] = parseFloat(data.cells[i].value);
-												umi_values_1[i] = roundtwo(umi_values_1[i]);
-											}
-											else{
-												umi_values_1[i]=null;
-											}
-										}
-									},
-									complete : function(){
-										$.ajax({
-											url: query_umi_2,
-											type : "GET",
-											dataType : "jsonp",
-											async : false,
-											error: function(xhr, ajaxOptions, thrownErrorxhr){
-												console.log(xhr.status);
-												console.log(thrownErrorxhr.message);
-											},
-											success: function(data){
-												console.log('query umi1 success');
-												//devo salvare i dati nel vettore, come per grafico centrale
-												var count = data.cells.length;
-												console.log(count);
-												for ( var i = 0; i < count; i++) {
-													if(data.cells[i].value!=null){
-														umi_values_2[i] = parseFloat(data.cells[i].value);
-														umi_values_2[i] = roundtwo(umi_values_2[i]);
-													}
-													else{
-														umi_values_2[i]=null;
-													}
-												}
-											},
-											complete: function(){
-												$.ajax({
-													url: query_umi_3,
-													type : "GET",
-													dataType : "jsonp",
-													async : false,
-													error: function(xhr, ajaxOptions, thrownErrorxhr){
-														console.log(xhr.status);
-														console.log(thrownErrorxhr.message);
-													},
-													success: function(data){
-														console.log('query umi1 success');
-														//devo salvare i dati nel vettore, come per grafico centrale
-														var count = data.cells.length;
-														console.log(count);
-														for ( var i = 0; i < count; i++) {
-															if(data.cells[i].value!=null){
-																umi_values_3[i] = parseFloat(data.cells[i].value);
-																umi_values_3[i] = roundtwo(umi_values_3[i]);
-															}
-															else{
-																umi_values_3[i]=null;
-															}
-														}
-													},
-													complete : function(){
-														//ajyax co2
-														$.ajax({
-															url: query_co2_1,
-															type : "GET",
-															dataType : "jsonp",
-															async : false,
-															error: function(xhr, ajaxOptions, thrownErrorxhr){
-																console.log(xhr.status);
-																console.log(thrownErrorxhr.message);
-															},
-															success: function(data){
-																console.log('query co2 success');
-																//devo salvare i dati nel vettore, come per grafico centrale
-																var count = data.cells.length;
-																console.log(count);
-																for ( var i = 0; i < count; i++) {
-																	if(data.cells[i].value!=null){
-																		co2_values_1[i] = parseFloat(data.cells[i].value);
-																		co2_values_1[i] = roundtwo(co2_values_1[i]);
-																	}
-																	else{
-																		co2_values_1[i]=null;
-																	}
-																}
-															},
-															complete : function(){
-																$.ajax({
-																	url: query_co2_2,
-																	type : "GET",
-																	dataType : "jsonp",
-																	async : false,
-																	error: function(xhr, ajaxOptions, thrownErrorxhr){
-																		console.log(xhr.status);
-																		console.log(thrownErrorxhr.message);
-																	},
-																	success: function(data){
-																		console.log('query co2 success');
-																		//devo salvare i dati nel vettore, come per grafico centrale
-																		var count = data.cells.length;
-																		console.log(count);
-																		for ( var i = 0; i < count; i++) {
-																			if(data.cells[i].value!=null){
-																				co2_values_2[i] = parseFloat(data.cells[i].value);
-																				co2_values_2[i] = roundtwo(co2_values_2[i]);
-																			}
-																			else{
-																				co2_values_2[i]=null;
-																			}
-																		}
-																	},
-																	complete: function(){
-																		$.ajax({
-																			url: query_co2_3,
-																			type : "GET",
-																			dataType : "jsonp",
-																			async : false,
-																			error: function(xhr, ajaxOptions, thrownErrorxhr){
-																				console.log(xhr.status);
-																				console.log(thrownErrorxhr.message);
-																			},
-																			success: function(data){
-																				console.log('query co2 success');
-																				//devo salvare i dati nel vettore, come per grafico centrale
-																				var count = data.cells.length;
-																				console.log(count);
-																				for ( var i = 0; i < count; i++) {
-																					if(data.cells[i].value!=null){
-																						co2_values_3[i] = parseFloat(data.cells[i].value);
-																						co2_values_3[i] = roundtwo(co2_values_3[i]);
-																					}
-																					else{
-																						co2_values_3[i]=null;
-																					}
-																				}
-																			},
-																			complete : function(){
-																				//grafico
-																				 var chart = new Highcharts.Chart({
-																			         chart: {
-																			             renderTo: 'grafico_tuc'
-																			         },
-																			         title: {
-																			             text: 'Temperature, Relative Humidity and CO2'
-																			         },
-																			         subtitle: {
-																			             text: 'Last 24 hours'
-																			         },
-																			         xAxis: [{
-																			             categories: last_hours
-																			         }],
-																			         yAxis: [{ // Primary yAxis
-																			             labels: {
-																			                 formatter: function() {
-																			                     return this.value +'°C';
-																			                 },
-																			                 style: {
-																			                     color: '#f5991a'
-																			                 }
-																			             },
-																			             title: {
-																			                 text: 'Temperature',
-																			                 style: {
-																			                     color: '#f5991a'
-																			                 }
-																			             }
-																			           
-																			         }, { // Secondary yAxis
-																			            // gridLineWidth: 0,
-																			             title: {
-																			                 text: 'Relative Humidity',
-																			                 style: {
-																			                     color: '#4572A7'
-																			                 }
-																			             },
-																			             labels: {
-																			                 formatter: function() {
-																			                     return this.value +' %';
-																			                 },
-																			                 style: {
-																			                     color: '#4572A7'
-																			                 }
-																			             },
-																			             opposite: true,
-																			             min:0
-																			         },
-																			         { 
-																			           //  gridLineWidth: 0,
-																			             title: {
-																			                 text: 'CO2',
-																			                 style: {
-																			                     color: '#89A54E'
-																			                 }
-																			             },
-																			             labels: {
-																			                 formatter: function() {
-																			                     return this.value +' ppm';
-																			                 },
-																			                 style: {
-																			                     color: '#89A54E'
-																			                 }
-																			             },
-																			             opposite: true,
-																			             min:0
-																			 
-																			         }],
-																			         tooltip: {
-																			             shared: true
-																			         },
-																			         legend: {
-																			             layout: 'horizontal',
-																			             align: 'center',
-																			             verticalAlign: 'top',
-																			             y:40
-																			         },
-																			         series: [{
-																			             name: 'CO2 6th floor',
-																			             type: 'column',
-																			             color: '#89A54E',
-																			             yAxis: 2,
-																			             data: co2_values_1,
-																			             marker: {
-																			                 enabled: false
-																			             },
-																			             tooltip: {
-																			                 valueSuffix: ' ppm'
-																			             }
-																			         },{
-																			             name: 'CO2 4th floor',
-																			             type: 'column',
-																			             color: '#5b6d34',
-																			             yAxis: 2,
-																			             data: co2_values_2,
-																			             marker: {
-																			                 enabled: false
-																			             },
-																			             tooltip: {
-																			                 valueSuffix: ' ppm'
-																			             }
-																			         },{
-																			             name: 'CO2 2nd floor',
-																			             type: 'column',
-																			             color: '#262e16',
-																			             yAxis: 2,
-																			             data: co2_values_3,
-																			             marker: {
-																			                 enabled: false
-																			             },
-																			             tooltip: {
-																			                 valueSuffix: ' ppm'
-																			             }
-																			         },{
-																			             name: 'T 6th floor',
-																			             color: '#f5991a',
-																			             type: 'spline',
-																			             yAxis: 0,
-																			             data: temp_values_1,
-																			             tooltip: {
-																			                 valueSuffix: ' °C'
-																			             }
-																			 
-																			         },{
-																			             name: 'T 4th floor',
-																			             color: '#935d10',
-																			             type: 'spline',
-																			             yAxis: 0,
-																			             data: temp_values_2,
-																			             tooltip: {
-																			                 valueSuffix: ' °C'
-																			             }
-																			 
-																			         }, {
-																			             name: 'T 2nd floor',
-																			             color: '#472d08',
-																			             type: 'spline',
-																			             yAxis: 0,
-																			             data: temp_values_3,
-																			             tooltip: {
-																			                 valueSuffix: ' °C'
-																			             }
-																			 
-																			         }, {
-																			             name: 'RH 6th floor',
-																			             type: 'spline',
-																			             color: '#4572A7',
-																			             yAxis: 1,
-																			             data: umi_values_1,
-																			             marker: {
-																			                 enabled: false
-																			             },
-																			             dashStyle: 'shortdot',
-																			             tooltip: {
-																			                 valueSuffix: ' %'
-																			             }
-																			         },
-																			         {
-																			             name: 'RH 4th floor',
-																			             type: 'spline',
-																			             color: '#284361',
-																			             yAxis: 1,
-																			             data: umi_values_2,
-																			             marker: {
-																			                 enabled: false
-																			             },
-																			             dashStyle: 'shortdot',
-																			             tooltip: {
-																			                 valueSuffix: ' %'
-																			             }
-																			         },{
-																			             name: 'RH 2nd floor',
-																			             type: 'spline',
-																			             color: '#14202f',
-																			             yAxis: 1,
-																			             data: umi_values_3,
-																			             marker: {
-																			                 enabled: false
-																			             },
-																			             dashStyle: 'shortdot',
-																			             tooltip: {
-																			                 valueSuffix: ' %'
-																			             }
-																			         }]
-																			     });
-																			}
-																		});
-																	}
-																});
-															}
-														});
-													}
-												});
-											}
-										});
-									}
-								});
-							}
-						});
-
-					}
-				});
-			}
-		});
-	}
-	else{
+	
 		console.log(query_temp);
 		$.ajax({
 			url : query_temp,
@@ -629,12 +82,17 @@ $(document).ready(function(){
 			success : function(data){
 				console.log('query temp success');
 				//devo salvare i dati nel vettore, come per grafico centrale
-				var count = data.cells.length;
+				var count = data.measures.length;
 				console.log(count);
 				for ( var i = 0; i < count; i++) {
-					if(data.cells[i].value!=null){
-						temp_values[i] = parseFloat(data.cells[i].value);
-						temp_values[i] = roundtwo(temp_values[i]);
+					if(data.measures[i].value!=null){
+						var time = moment(data.measures[i].time);
+						var date = Date.UTC(time.year(), time.month(), time.date(), time.hour(), time.minute(), 0);
+						var obj = new Array();
+						obj[0]=date;
+						obj[1]=roundtwo(parseFloat(data.measures[i].value)); 
+						
+						 temp_values[i] = obj; 
 					}
 					else{
 						temp_values[i]=null;
@@ -650,22 +108,27 @@ $(document).ready(function(){
 				
 				//altra query (umi)
 				$.ajax({
-					url : query_umi,
+					url : query_temp_out,
 					type : "GET",
 					dataType : "jsonp",
 					async : false,
 					success: function(data){
 						console.log(data);
 						//devo salvare i dati nel vettore, come per grafico centrale
-						var count = data.cells.length;
+						var count = data.measures.length;
 						console.log(count);
 						for ( var i = 0; i < count; i++) {
-							if(data.cells[i].value!=null){
-								umi_values[i] = parseFloat(data.cells[i].value);
-								umi_values[i] = roundtwo(umi_values[i]);
+							if(data.measures[i].value!=null){
+								var time = moment(data.measures[i].time);
+								var date = Date.UTC(time.year(), time.month(), time.date(), time.hour(), time.minute(), 0);
+								var obj = new Array();
+								obj[0]=date;
+								obj[1]=roundtwo(parseFloat(data.measures[i].value)); 
+								
+								 temp_values_out[i] = obj; 
 							}
 							else{
-								umi_values[i]=null;
+								temp_values_out[i]=null;
 							}
 						}
 					},
@@ -674,156 +137,86 @@ $(document).ready(function(){
 						console.log(thrownErrorxhr.message);
 					},
 					complete : function(){
-						//altra query (co2)
-						$.ajax({
-							url : query_co2,
-							type : "GET",
-							dataType : "jsonp",
-							async : false,
-							success: function(data){
-								//devo salvare i dati nel vettore, come per grafico centrale
-								var count = data.cells.length;
-								console.log(count);
-								for ( var i = 0; i < count; i++) {
-									if(data.cells[i].value!=null){
-										co2_values[i] = parseFloat(data.cells[i].value);
-										co2_values[i] = roundtwo(co2_values[i]);
-									}
-									else{
-										co2_values[i]=null;
-									}
-								}
-							},
-							error: function(xhr, ajaxOptions, thrownErrorxhr){
-								console.log(xhr.status);
-								console.log(thrownErrorxhr.message);
-							},
-							complete : function(){
-								
-								//grafico
-								 var chart = new Highcharts.Chart({
-							         chart: {
-							             renderTo: 'grafico_tuc'
-							         },
-							         title: {
-							             text: 'Temperature, Relative Humidity and CO2'
-							         },
-							         subtitle: {
-							             text: 'Last 24 hours'
-							         },
-							         xAxis: [{
-							             categories: last_hours
-							         }],
-							         yAxis: [{ // Primary yAxis
-							             labels: {
-							                 formatter: function() {
-							                     return this.value +'°C';
-							                 },
-							                 style: {
-							                     color: '#f5991a'
-							                 }
-							             },
-							             title: {
-							                 text: 'Temperature',
-							                 style: {
-							                     color: '#f5991a'
-							                 }
-							             }
-							           
-							         }, { // Secondary yAxis
-							             //gridLineWidth: 0,
-							             title: {
-							                 text: 'Relative Humidity',
-							                 style: {
-							                     color: '#4572A7'
-							                 }
-							             },
-							             labels: {
-							                 formatter: function() {
-							                     return this.value +' %';
-							                 },
-							                 style: {
-							                     color: '#4572A7'
-							                 }
-							             },
-							             opposite: true,
-							             min: 0
-							         },
-							         { 
-							            // gridLineWidth: 0,
-							             title: {
-							                 text: 'CO2',
-							                 style: {
-							                     color: '#89A54E'
-							                 }
-							             },
-							             labels: {
-							                 formatter: function() {
-							                     return this.value +' ppm';
-							                 },
-							                 style: {
-							                     color: '#89A54E'
-							                 }
-							             },
-							             opposite: true,
-							             min:0
-							         }],
-							         tooltip: {
-							             shared: true
-							         },
-							         legend: {
-							             layout: 'horizontal',
-							             align: 'center',
-							             verticalAlign: 'top',
-							             y:40
-							         },
-							         series: [{
-							             name: 'CO2',
-							             type: 'column',
-							             color: '#89A54E',
-							             yAxis: 2,
-							             data: co2_values,
-							             marker: {
-							                 enabled: false
-							             },
-							             tooltip: {
-							                 valueSuffix: ' ppm'
-							             }
-							         }, {
-							             name: 'Temperature',
-							             color: '#f5991a',
-							             type: 'spline',
-							             yAxis: 0,
-							             data: temp_values,
-							             tooltip: {
-							                 valueSuffix: ' °C'
-							             }
-							 
-							         }, {
-							             name: 'Relative Humidity',
-							             type: 'spline',
-							             color: '#4572A7',
-							             yAxis: 1,
-							             data: umi_values,
-							             marker: {
-							                 enabled: false
-							             },
-							             dashStyle: 'shortdot',
-							             tooltip: {
-							                 valueSuffix: ' %'
-							             }
-							         }]
-							     });
-								
-							}
-						});
+						
+						//grafico
+						 var chart = new Highcharts.Chart({
+					         chart: {
+					             renderTo: 'grafico_tuc'
+					         },
+					         title: {
+					             text: 'Inside Temperature and Outside Temperature'
+					         },
+					         subtitle: {
+					             text: 'Last 24 hours'
+					         },
+					         xAxis: [{
+					        	 type: 'datetime',
+					                title: {
+					                    text: null
+					                }
+					         }],
+					         yAxis: [{ // Primary yAxis
+					             labels: {
+					                 formatter: function() {
+					                     return this.value +'°C';
+					                 },
+					                 style: {
+					                     color: '#f5991a'
+					                 }
+					             },
+					             title: {
+					                 text: 'Temperature',
+					                 style: {
+					                     color: '#f5991a'
+					                 }
+					             }
+					           
+					         }],
+					         tooltip: {
+					             shared: true
+					         },
+					         legend: {
+					             layout: 'horizontal',
+					             align: 'center',
+					             verticalAlign: 'top',
+					             y:40
+					         },
+					         series: [{
+					             name: 'Outside Temperature',
+					             type: 'spline',
+					             color: '#4572A7',
+					             yAxis: 0,
+					             data: temp_values_out,
+					             pointStart: Date.UTC(last_year, last_month-1, last_day,last_hour, 0 ),
+						         pointInterval: point_interval, 
+					             marker: {
+					                 enabled: true
+					             },
+					             tooltip: {
+					                 valueSuffix: ' °C'
+					             }
+					         }, {
+					             name: 'Inside Temperature',
+					             color: '#f5991a',
+					             type: 'spline',
+					             yAxis: 0,
+					             data: temp_values,
+					             pointStart: Date.UTC(last_year, last_month-1, last_day,last_hour, 0 ),
+						         pointInterval: point_interval, 
+					             tooltip: {
+					                 valueSuffix: ' °C'
+					             }
+					 
+					         }]
+					     });
+						
 						
 					}
 				});
 
 			}
 		});
-	}
+	
 
 
 });

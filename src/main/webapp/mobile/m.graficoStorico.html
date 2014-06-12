@@ -10,20 +10,16 @@
 **************************************************************************** -->
 
 <script>
+var primo_anno;
+var oggi_anno;
+var query_tmp;
+var tz="%2B";
 $(document).ready(function() {
 	//check the place from session storage
 	var place = GetURLParameter('place', sessionStorage.getItem('url'));
 	console.log(place);
 	
-	if(place=="verres"){
-		query_db = verres_query_db;
-		query_dwh = verres_query_dwh;
-	}
-	else if(place=="mirafiori"){
-		query_db = mirafiori_query_db;
-		query_dwh = mirafiori_query_dwh;
-	}
-//prendo un intervallo di tempo da oggi a 1 mese fa
+	//prendo un intervallo di tempo da oggi a 1 mese fa
 	
 	//prendo giorno, mese, anno corrente
 	//prendo la data
@@ -39,6 +35,23 @@ $(document).ready(function() {
 	var lastmese_storico = lastMonthBegin_storico.month()+1;
 	var lastgiorno_storico = lastMonthBegin_storico.date();
 	
+	
+	var time_zone;
+	//time zone
+	time_zone=moment().format("ZZ");
+	time_zone.toString();
+	for(n=1;n<time_zone.length;n++){
+		tz=tz+time_zone[n];
+	}
+	
+	oggi_anno=currentDate_storico.year();
+	
+	var query;
+	
+	query = week_query;
+	query_tmp = week_query;
+	
+	
 	dograficoStorico(lastanno_storico, lastmese_storico, lastgiorno_storico, anno_storico, mese_storico, giorno_storico);
 
 });
@@ -52,7 +65,11 @@ function dograficoStorico(lastanno, lastmese, lastgiorno, anno, mese, giorno){
 	//devo prendere il parametro totalenergy 
 	var drain = GetURLParameter("totalenergy",sessionStorage.getItem('url'));
 	
-	var query_history = build_interval_query_energy(drain, lastanno,lastmese, lastgiorno, null, null, anno, mese, giorno, null, null, true);
+	//construct the query belonging to data parameter 
+	var start= lastanno + "-" + lastmese + "-" + lastgiorno + "T00:00:00" + tz;
+	var end= anno + "-" + mese + "-" + giorno + "T23:59:59" + tz;
+	query_history = query_tmp + drain + "?timeAggregation=DAY&start=" +start + "&end=" + end + "&measureAggregation=SUM";
+	
 	console.log("query history " + query_history);
 	
 	$.ajax({
@@ -64,8 +81,6 @@ function dograficoStorico(lastanno, lastmese, lastgiorno, anno, mese, giorno){
 			$("#graficoStorico").append(scritta); 
 		},
 		success : function(data) {
-			console.log(data);
-			console.log("success query grafico storico");
 			time_value_array=parse_time_value_data(data, 1000);
 		},
 		
@@ -110,23 +125,10 @@ function dograficoStorico(lastanno, lastmese, lastgiorno, anno, mese, giorno){
 				    	type: 'column',
 				        name: 'Daily Consumption',
 				        data: time_value_array,
+				        pointStart: Date.UTC(lastanno, lastmese-1, lastgiorno),
+			            pointInterval: 24*3600*1000,//one day 
 				          dataGrouping: {
-				    	   dateTimeLabelFormats: {
-				    		   day: ['%A, %b %e, %Y', '%A, %b %e', '-%A, %b %e, %Y'],
-				    		   week: ['Week from %A, %b %e, %Y', '%A, %b %e', '-%A, %b %e, %Y'],
-				    		   month: ['%B %Y', '%B', '-%B %Y'],
-				    		   year: ['%Y', '%Y', '-%Y']
-				    	   },
-							units: [[
-							    'day',
-							    [1]
-							],[
-								'week', // unit name
-								[1] // allowed multiples
-							], [
-								'month',
-								[1, 2, 3]
-							]]
+				    	   enabled:false
 				        }  
 				    }]
 				});

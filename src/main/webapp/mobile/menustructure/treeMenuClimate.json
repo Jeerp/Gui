@@ -1,0 +1,37 @@
+[ { "children" : [ ],
+    "description" : "ServerFarm",
+    "drains" : [ 
+    	{ "description" : "",
+          "id" : "HVAC_SERVERFARM_T",
+          "name" : "HVAC_SERVERFARM_T",
+          "type" : "Temperature"
+        },
+        { "description" : "",
+          "id" : "HVAC_OUTSIDE_T",
+          "name" : "HVAC_OUTSIDE_T",
+          "type" : "OutsideTemperature"
+        }
+        
+      ],
+    "id" : "ServerFarm",
+    "name" : "Server Farm"
+  },
+  { "children" : [ ],
+    "description" : "Meeting Room",
+    "drains" : [ 
+        { "description" : "",
+          "id" : "HVAC_MEETING_T",
+          "name" : "HVAC_MEETING_T",
+          "type" : "Temperature"
+        },
+        { "description" : "",
+          "id" : "HVAC_OUTSIDE_T",
+          "name" : "HVAC_OUTSIDE_T",
+          "type" : "OutsideTemperature"
+        }
+      ],
+    "id" : "MeetingRoom",
+    "name" : "Meeting Room"
+  }
+  
+]

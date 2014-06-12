@@ -18,28 +18,35 @@ var chart_sens;
 var sensoriarray;
 var current_hour;
 var factor;
+var tz="%2B";
+
 $(document).ready(function() {
-	
-	//prendo i sensori
-	//alert('session storage ' + sessionStorage.getItem('url'));
-	//check the place from session storage
+	console.log('ready');
 	var place = GetURLParameter('place', sessionStorage.getItem('url'));
-	console.log(place);
+	console.log(place); 
 	
-	if(place=="verres"){
-		query_db = verres_query_db;
-		query_dwh = verres_query_dwh;
+	 var time_zone;
+	//time zone
+	time_zone=moment().format("ZZ");
+	time_zone.toString();
+	//var tz="%2B";
+	for(n=1;n<time_zone.length;n++){
+		tz=tz+time_zone[n];
 	}
-	else if(place=="mirafiori"){
-		query_db = mirafiori_query_db;
-		query_dwh = mirafiori_query_dwh;
-	}
+	
+	query = week_query;
+	query_tmp = week_query;
+	
+	
 	
 	var sensori = GetURLParameter('energy', sessionStorage.getItem('url'));
+	console.log(sensori);
 	
-	sensoriarray = sensori.split("|");
+	if(typeof sensori !='undefined'){
+		sensoriarray = sensori.split("|");
+	}
 	
-
+	
 	//prendo la data
 	var currentDate = moment();
 	
@@ -56,24 +63,31 @@ $(document).ready(function() {
 	var lastmese = lastMonthBegin.month()+1;
 	var lastgiorno = lastMonthBegin.date();
 	
-	doGraph(lastanno, lastmese, lastgiorno, anno, mese, giorno);
-	$("#graficoSensori").click(function(){
-		alert('click');	
-	});
+	doGraph(lastanno, lastmese, lastgiorno, anno, mese, giorno); 
+	
 });
 
-function doGraph(lastanno, lastmese, lastgiorno, anno, mese, giorno){
+ function doGraph(lastanno, lastmese, lastgiorno, anno, mese, giorno){
+	
 
-	//voglio svuotare il div con il grafico, così si campisce che sto caricando qualcosa
+	 //voglio svuotare il div con il grafico, così si campisce che sto caricando qualcosa
 	
 	$("#graficoSensori").text("Loading data...");
 	
 	//construisco la query del totale
 	var tot_sen = GetURLParameter("totalenergy", sessionStorage.getItem('url'));
-	var query_tot = build_interval_query_energy(tot_sen,lastanno, lastmese,lastgiorno,0,0,anno,mese,giorno,current_hour,0,true);
-	factor=2;
-
-	console.log("query tot "+query_tot);
+	
+	
+	var query_tot;
+	//query sull'ora
+	var start= lastanno + "-" + lastmese + "-" + lastgiorno + "T00:00:00" + tz;
+	var end= anno + "-" + mese + "-" + giorno + "T23:59:59" + tz;
+	console.log(tz);
+	query_tot = query_tmp + tot_sen + "?timeAggregation=HOUR&start=" +start + "&end=" + end;
+	console.log(query_tot);
+	
+	factor = 1;
+	point_interval = 1 * 3600 * 1000; //one hour
 	
 	var time_value_array_tot = new Array();
 	
@@ -88,7 +102,7 @@ function doGraph(lastanno, lastmese, lastgiorno, anno, mese, giorno){
 	success:function(data){
 		console.log("oh yeah, what a success");
 		console.log(data);
-		if(typeof data.axes === 'undefined'){
+		if(typeof data.measures === 'undefined'){
 			var scritta = $("<p class='errorMessage'>").text("Data are temporarily not available. Try to refresh the page");
 			$("#graficoSensori").append(scritta); 
 			return;
@@ -96,6 +110,7 @@ function doGraph(lastanno, lastmese, lastgiorno, anno, mese, giorno){
 		time_value_array_tot = parse_time_value_data(data, 1000);
 	},
 	complete: function (qXHR, textStatus) {
+		
 		//creo il grafico 
 		//alert("creo il grafico");
 		$("#graficoSensori").empty();
@@ -152,27 +167,18 @@ function doGraph(lastanno, lastmese, lastgiorno, anno, mese, giorno){
 		    	},
 		        selected: 1
 		    },
-		    series: [{
+		    xAxis: {
+                type: 'datetime',
+                title: {
+                    text: null
+                }
+            },
+            series: [{
 		    	type: 'spline',
 		        name: 'Total',
 		        data: time_value_array_tot,
 		         dataGrouping: {
-		    	   dateTimeLabelFormats: {
-		    		   day: ['%A, %b %e, %Y', '%A, %b %e', '-%A, %b %e, %Y'],
-		    		   week: ['Week from %A, %b %e, %Y', '%A, %b %e', '-%A, %b %e, %Y'],
-		    		   month: ['%B %Y', '%B', '-%B %Y'],
-		    		   year: ['%Y', '%Y', '-%Y']
-		    	   },
-					units: [[
-					    'day',
-					    [1]
-					],[
-						'week', // unit name
-						[1] // allowed multiples
-					], [
-						'month',
-						[1, 2, 3]
-					]]
+		    	   enabled: false
 		        } 
 		    }],
 		    yAxis : {
@@ -191,26 +197,38 @@ function doGraph(lastanno, lastmese, lastgiorno, anno, mese, giorno){
 				 {
 				  var time_value_array = new Array();
 					var sens = sensoriarray[i];
-					query_sens =  build_interval_query_energy(sens,lastanno, lastmese,lastgiorno,0,0,anno,mese,giorno,current_hour,0,true);
-					factor=2;
+					var start= lastanno + "-" + lastmese + "-" + lastgiorno + "T00:00:00" + tz;
+					var end= anno + "-" + mese + "-" + giorno + "T23:59:59" + tz;
+
+					query_sens = query_tmp + sens + "?timeAggregation=HOUR&start=" +start + "&end=" + end;
+				
+					factor=1;
+					point_interval = 1* 3600 * 1000; //one_hour
 					
 			     $.ajax({
 			          url: query_sens,
 			          dataType:'jsonp',
 			          success: function(data) {
-			        	  if(typeof data.axes === 'undefined'){
+			        	  if(typeof data === 'undefined'){
 			      			var scritta = $("<p class='errorMessage'>").text("Il server non è al momento raggiungibile. Prova a ricaricare la pagina");
 			      			$("#graficoSensori").append(scritta); 
 			      			return;
 			      		}
 			        	  time_value_array = parse_time_value_data(data, 1000); 
+			        	  console.log('time_value_array');
+			        	  console.log(time_value_array);
 			          },
 			          complete: function (a, b){
+			        	  console.log('here i am');
 			        	  var nome = sensorname[sens];
 			        	  result[i]=time_value_array;
+			        	  console.log(nome);
+			        	  console.log(result[i]);
 			        	  chart_sen.addSeries({
 			      			name: nome,
-			      			data: result[i]
+			      			data: result[i],
+			      			pointStart: Date.UTC(lastanno, lastmese-1, lastgiorno),
+				            pointInterval: point_interval
 			      		});
 			        	  
 			          }
@@ -221,8 +239,8 @@ function doGraph(lastanno, lastmese, lastgiorno, anno, mese, giorno){
 		
 		
 	}
-});
-}
+}); 
+} 
 
 
 

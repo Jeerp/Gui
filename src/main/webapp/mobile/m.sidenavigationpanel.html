@@ -27,22 +27,13 @@ var place;
 		//var url = "menustructure/treeMenuVerres.json";
 		var url="";
 		
-		if(place=="verres"){
-			url = "menustructure/treeMenuVerres.json";
+		if(place=="energy"){
+			url = "menustructure/treeMenuEnergy.json";
 		}
-		else if(place=="corsoduca") {
-			url = "menustructure/treeMenuCorsoDuca.json";
+		else if(place=="climate") {
+			url = "menustructure/treeMenuClimate.json";
 		}
-		else if(place=="mirafiori"){
-			url = "menustructure/treeMenuMirafiori.json";
-		}
-		else if (place=="clim_mirafiori"){
-			url = "menustructure/navigazioneClimMirafiori.json"
-		}
-		else if(place=="serverfarm"){
-			url = "menustructure/treeServerFarm.json";
-		}
-
+		
 
 		
 		jQuery.ajax({

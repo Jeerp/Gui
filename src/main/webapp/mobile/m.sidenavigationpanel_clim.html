@@ -28,12 +28,10 @@ var place;
 		//var url = "menustructure/treeMenuVerres.json";
 		var url="";
 		
-		if(place=="verres"){
-			url = "menustructure/treeClimVerres.json";
+		if(place=="climate"){
+			url = "menustructure/treeMenuClimate.json";
 		}
-		else if(place=="mirafiori"){
-			url = "";
-		}
+		
 
 		jQuery.ajax({
 			url: url,

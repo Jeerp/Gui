@@ -35,16 +35,35 @@
 
 				//prendo data, mese e anno corrente
 				//uso funzioni di moment.js
-
+				
+				//time zone
+				var time_zone=moment().format("ZZ");
+				time_zone.toString();
+				var tz="%2B";
+				for(n=1;n<time_zone.length;n++){
+					tz=tz+time_zone[n];
+				}
+				
 				/*OGGI*/
-				var day = moment().date();
-				var month = moment().month() +1; //perch� il mese parte da zero
-				var year = moment().year();
-				//devo prendere l'ora corrente
+				var prev_hour = moment().subtract('hour',2).hour();
+				var today_start = moment().format("YYYY-MM-DDT"+prev_hour+":00:00");
+				var today_end = moment().format("YYYY-MM-DDT23:59:59");
+				
+				var today_start_tz = today_start+tz;
+				var today_end_tz = today_end+tz;
+				
+				/*IERI*/
+				var yesterday_start = moment().subtract("days",1).format("YYYY-MM-DDT"+prev_hour+":00:00");
 				var current_hour = moment().hour();
+				var yesterday_end = moment().subtract("days",1).format("YYYY-MM-DDT"+current_hour+":59:59");
+				
+				var yesterday_start_tz = yesterday_start+tz;
+				var yesterday_end_tz = yesterday_end+tz;
+				
 				var query_today_current_hour = moment().subtract('hour',1).hour();
 				//calcolo le tre ore precedenti
-				var prev_hour = moment().subtract('hour',2).hour();
+
+				
 				
 				//in base a questo costruisco anche l'array con le categories
 				var categories = [
@@ -52,38 +71,13 @@
 				                 	moment().subtract('hour',1).hour()+"-"+moment().hour(),
 				                 	moment().hour()+"-"+moment().add('hour',1).hour()
 				                 ];
-				
-				
-				/*IERI*/
-				var yesterday = moment().subtract('days', 1);
-				console.log(yesterday);
-				var yesterday_day = yesterday.date();
-				var yesterday_month = yesterday.month() + 1;
-				var yesterday_year = yesterday.year();
-				
-				console.log(day + " " + month + " " + year);
-				console.log(yesterday_day + " " + yesterday_month + " " + yesterday_year);
-				
-				//in base al parameter, costruisco la query
+
 				
 				//prendo anche la location nel db 
 				var url = sessionStorage.getItem('url');
 				var drain = GetURLParameter("totalenergy", url);
 				
-				//check the place from session storage
-				var place = GetURLParameter('place', url);
-				console.log(place);
-				
-				if(place=="verres"){
-					query_db = verres_query_db;
-					query_dwh = verres_query_dwh;
-				}
-				else if(place=="mirafiori"){
-					query_db = mirafiori_query_db;
-					query_dwh = mirafiori_query_dwh;
-				}
-				
-				query_yesterday = build_interval_query_energy(drain, yesterday_year, yesterday_month, yesterday_day, prev_hour, null, yesterday_year, yesterday_month, yesterday_day, current_hour, null, false );
+				query_yesterday=week_query + drain + "?timeAggregation=HOUR&start="+ yesterday_start_tz + "&end="+ yesterday_end_tz;
 				console.log("query yesterday "+query_yesterday);
 				
 				$.ajax({
@@ -143,7 +137,7 @@
 								console.log("current " + current_hour);
 								console.log("hour " + hour);
 								if (current_hour > hour) {
-									query_today = build_interval_query_energy(drain, year, month, day, prev_hour, null, year, month, day,  query_today_current_hour, null, false);
+									query_today =  week_query + drain + "?timeAggregation=HOUR&start="+ today_start_tz + "&end="+ today_end_tz;
 								
 									console.log("query today " + query_today);
 
@@ -182,7 +176,7 @@
 									console.log("current " + current_hour);
 									console.log("hour " + hour);
 									if (current_hour > hour) {
-										query_today = build_interval_query_energy(drain, year, mont, day, prev_hour, null, year, month, day,  current_hour-1, null, false);
+										query_today =  week_query + drain + "?timeAggregation=HOUR&start="+ today_start_tz + "&end="+ today_end_tz;
 										
 										console.log(query_today);
 

@@ -6,11 +6,11 @@ Highcharts.setOptions({
 
 Highcharts.theme = {
 	chart : {
-		backgroundColor : '#2D2D2D'
+		backgroundColor : '#f7f2f2'
 	},
 	title : {
 		style : {
-			color : '#FFFFFF',
+			color : '#000000',
 			fontWeight : 'bold',
 			'font-size' : '1.2em'
 
@@ -19,7 +19,7 @@ Highcharts.theme = {
 	yAxis : {
 		title : {
 			style : {
-				color : '#FFFFFF',
+				color : '#000000',
 				fontWeight : 'bold',
 				'font-size' : '1em'
 
@@ -27,21 +27,21 @@ Highcharts.theme = {
 		},
 		labels : {
 			style : {
-				color : 'white'
+				color : 'black'
 			}
 		},
 	},
 	xAxis : {
 		labels : {
 			style : {
-				color : 'white'
+				color : 'black'
 
 			}
 		},
 	},
 	legend : {
 		itemStyle : {
-			color : 'white'
+			color : 'black'
 		}
 	}
 };

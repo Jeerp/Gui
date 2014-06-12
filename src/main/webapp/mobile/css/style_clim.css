@@ -10,11 +10,11 @@
 *******************************************************************************/
 
 body{
-	background-color:#2d2d2d;
+	background-color:white;
 }
 
 .ui-page {
-   background: #2d2d2d;
+   background: white;
 }
 
 .invisible{
@@ -41,7 +41,7 @@ body{
 }
 
 #grafico_temp, #grafico_umi, #grafico_ill, #ist_temp, #ist_umi, #ist_ill{
-	background-color:#2d2d2d;
+	background-color:#f7f2f2;
 	border-radius:5px;
 	margin-top:5px;
 }
@@ -66,10 +66,10 @@ body{
 .legenda {
 	font-size:small;
 	border-radius:5px;
-	border-color: #c6c6c6;
+	border-color: #f7f2f2;
 	border-style:solid;
 	border-width:2px;
-	background-color: #2d2d2d;
+	background-color: #f7f2f2;
 	width:12%;
 	position:absolute;
 	right:10px;
@@ -108,15 +108,15 @@ body{
 }
 
 .left_container_big_up, .left_container_big_bottom, .left_container_big_up_plus, .left_bottom_container, .right_bottom_container {
-	background-color: #2d2d2d;
+	background-color: #f7f2f2;
 	border-radius: 5px;
 }
 
 .right_container_small_up,.right_container_small_up_plus,.right_container_small_bottom, .right_container_small_up_plus {
-	background-color: #2d2d2d;
+	background-color: #f7f2f2;
 	border-radius: 5px;
 	position:relative;
-	width:70%;
+	width:60%;
 	margin-top:10px;
 	margin:auto;
 }
@@ -129,7 +129,7 @@ body{
 .right_container_inside_up_plus,
 .right_container_inside_middle_plus,
 .right_container_inside_bottom_plus{
-	height:33%;
+	height:50%;
 	width:100%;
 }
 
@@ -166,7 +166,7 @@ body{
 }
 
 .youropinion{
-	background-color: #2d2d2d;
+	background-color: #f7f2f2;
 	border-radius:5px;
 	margin-top:2%;
 }
@@ -231,7 +231,7 @@ body{
 	}
 	
 	.left_container_big_up_plus, .right_container_small_up_plus,#grafico_tuc {
-		height:520px;
+		height:420px;
 	}
 	.left_container_big_bottom_less {
 		height:200px;
@@ -245,7 +245,7 @@ body{
 	}
 	
 	.left_container_big_up_plus, .right_container_small_up_plus,,#grafico_tuc {
-		height:552px;
+		height:452px;
 	}	
 	.left_container_big_bottom_less {
 		height:200px;
@@ -258,7 +258,7 @@ body{
 	}
 	
 	.left_container_big_up_plus, .right_container_small_up_plus, #grafico_tuc {
-		height:652px;
+		height:552px;
 	}
 	.left_container_big_bottom_less {
 		height:200px;
@@ -274,7 +274,7 @@ body{
 	}
 	
 	.left_container_big_up_plus, .right_container_small_up_plus,#grafico_tuc {
-		height:520px;
+		height:420px;
 	}
 	.left_container_big_bottom_less {
 		height:200px;

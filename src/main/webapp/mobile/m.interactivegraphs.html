@@ -13,6 +13,7 @@
 
       //gestione bottoni
     	$("#graficosensori").on('click', function(e){
+    		
     		e.preventDefault();
     		$('#interactive_graph_container').load('m.graficoSensori.html', function(){
     			$(this).trigger('create');

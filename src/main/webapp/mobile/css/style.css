@@ -17,8 +17,8 @@
 
 body{
 	font-family: 'Roboto', sans-serif;
-	background-color: black;
-	color:white;
+	background-color: white;
+	color:black;
 	font-size:1em;
 }
 
@@ -87,9 +87,9 @@ body{
 	}
 /* gauge con consumo istantaneo */
 .grafico_istantaneo, .grafico_istantaneo_aula {
-	background-color: #2D2D2D;
+	background-color: #f7f2f2;
 	border-radius: 5px;
-	color: white;
+	color: black;
 	margin-top: 5px;
 	width:70%; 
 
@@ -124,9 +124,9 @@ body{
 }
 /* grafico orario */
 .grafico_centrale {
-	background-color: #2D2D2D;
+	background-color: #f7f2f2;
 	border-radius: 5px;
-	color: white;
+	color: black;
 	margin-top: 5px;
 	width: 90%;
 	min-height:90%;
@@ -140,7 +140,7 @@ body{
 
 /* grafico settimanale */
 .grafico_settimana{
-		background-color:#2D2D2D; 
+		background-color:#f7f2f2; 
 		border-radius: 5px;
 		color: white; 
 		margin-top:5px;
@@ -156,7 +156,7 @@ body{
 
 #warning-message { display: none; }
     @media only screen and (orientation:portrait){
-		#default,#choose, #verres, #mirafiori, #verres_clim, #mirafiori_clim { display:none; }
+		#default,#choose, #jeerp-energy, #mirafiori, #verres_clim, #mirafiori_clim { display:none; }
         #warning-message { display:block; }
     }
     @media only screen and (orientation:landscape){

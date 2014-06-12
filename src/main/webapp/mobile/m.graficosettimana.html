@@ -15,14 +15,6 @@ var query_week;
 var week_chart;
 var last_week_values = new Array();
 
-var day_begin_last_week;
-var month_begin_last_week;
-var year_begin_last_week;
-
-var day_end_last_week;
-var month_end_last_week;
-var year_end_last_week;
-
 var drain;
 
 var url = sessionStorage.getItem('url');
@@ -33,53 +25,35 @@ drain=GetURLParameter("totalenergy", url);
 //prendo data odierna con moment
 var today = moment();
 		
+//time zone
+var time_zone=moment().format("ZZ");
+time_zone.toString();
+var tz="%2B";
+for(n=1;n<time_zone.length;n++){
+	tz=tz+time_zone[n];
+}
 
 
 		//creo un vettore con i 3 giorni precedenti ad oggi
 		var last_week = new Array(3);
-		var j = 1;
-
-		for ( var i = 2; i >= 0; i--) {
-			//sottraggo da today le i 3 giorni precedenti
-			var date = today.subtract('days', 1);
-			var dateString = date.date()+"/"+(date.month()+1); //piÃ¹ uno eprchÃ¨ i mesi iniziano da zero
-			console.log("gli ultimi tre giorni sono " +dateString);
-			//questo mi serve comunque per le categories
-			last_week[i] = dateString;
-			//qui mi servono data di inizio e fine della settimana per la query
-			if (j == 1) {
-				//memorizzo giorno mese e anno dell'ultimo giorno degli ultimi sette giorno
-				day_end_last_week = date.date();
-				month_end_last_week = date.month() + 1;
-				year_end_last_week = date.year();
-				console.log("j==1 " +day_end_last_week + " " + month_end_last_week + " " + year_end_last_week);
-			}
-			if (j == 3) {
-				//memorizzo giorno, mese e anno dell'inizio degli ultimi 7 giorni
-				day_begin_last_week = date.date();
-				month_begin_last_week = date.month() + 1;
-				year_begin_last_week = date.year();
-				console.log("j==3 " +day_begin_last_week + " " + month_begin_last_week + " " + year_begin_last_week);
-			}
-			j++;
-
-		}
+		
 		
 		//check the place from session storage
 		var place = GetURLParameter('place', url);
 		
-		if(place=="verres"){
-			query_db = verres_query_db;
-			query_dwh = verres_query_dwh;
-		}
-		else if(place=="mirafiori"){
-			query_db = mirafiori_query_db;
-			query_dwh = mirafiori_query_dwh;
-		}
+		//prendo la data di ieri e quella di oggi e aggiungo la time zone
+		var yesterday=moment().subtract('days', 1).format("YYYY-MM-DDT23:59:59");
+		yesterday=yesterday+tz;
+		var last_week=moment().subtract('days', 3).format("YYYY-MM-DDT00:00:00");
+		last_week=last_week+tz;
 		
-		query_week = build_interval_query_energy(drain, year_begin_last_week,month_begin_last_week, day_begin_last_week, null, null, year_end_last_week,month_end_last_week, day_end_last_week, null, null, false);					
+		query_week = week_query + drain + "?timeAggregation=DAY&measureArregation=SUM&start="+ last_week + "&end="+ yesterday;
 
 		console.log("query week " + query_week);
+		
+		var last_week_utcY=moment().subtract('days', 3).format("YYYY");
+		var last_week_utcM=moment().subtract('days', 3).format("MM");
+		var last_week_utcD=moment().subtract('days', 3).format("DD");
 
 		//chiamata ajax per il file json di esempio dei consumi dell'ultima settimana
 		$.ajax({
@@ -96,6 +70,7 @@ var today = moment();
 				$("#week_chart").append(scritta);
 			},
 			complete : function(qXHR, textStatus) {
+				var point_interval = 24 * 3600 * 1000; //one day 
 				week_chart = new Highcharts.Chart({
 					chart : {
 						renderTo : 'week_chart',
@@ -115,7 +90,11 @@ var today = moment();
 			            text: 'Last Days'
 					},
 					xAxis : {
-						categories : last_week
+						type: 'datetime',
+		                title: {
+		                    text: null
+		                },
+		                tickInterval: 24 * 3600 * 1000
 					},
 					yAxis : {
 						title : {
@@ -125,7 +104,9 @@ var today = moment();
 					},
 					series : [ {
 						name : 'Energy',
-						data : last_week_values
+						data : last_week_values,
+						pointStart: Date.UTC(last_week_utcY , last_week_utcM-1, last_week_utcD),
+				        pointInterval: point_interval
 					} ]
 
 				});

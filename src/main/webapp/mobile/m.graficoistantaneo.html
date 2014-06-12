@@ -12,6 +12,7 @@
 <script >
 var name, unit, value;
 var query_ist;
+var factor = 1;
 var g;
 //min e max per il gauge
 var max;
@@ -22,14 +23,9 @@ var totalpower = GetURLParameter('totalpower', url);
 //check the place from session storage
 var place = GetURLParameter('place', url);
 
-if(place=="verres"){
-	query_db = verres_query_db;
-	query_dwh = verres_query_dwh;
-}
+query_ist = instant_query+totalpower;
 
-query_ist = build_instant_query(totalpower);
-
-var query_last_hour_tot = query_db + totalpower+"?limit=360";
+var query_last_hour_tot = minute_query+totalpower;
 var last_hour_tot = new Array();
 //prendo la larghezza del pixel in div
 var w1 = $('.grafico_istantaneo').width();
@@ -50,10 +46,15 @@ $('#gauge').css({
 			console.log(x.response.message); 
 		},
 		success : function(data) {
-			console.log("success");
 			name = data.name;
-			value = data.measures[0].value;
-			console.log(value);
+			console.log("Rec " + data.value + " at "
+					+ moment(data.time).format("dddd, MMMM Do YYYY, h:mm:ss a"));
+			if (typeof data === 'undefined') {
+				$("#gauge").append("ND");
+			} else {
+				value = data.value;
+				value = value * factor;
+			}
 		},
 		complete : function(qXHR, textStatus) {
 			var label = "W";
@@ -78,11 +79,11 @@ $('#gauge').css({
 			g = new JustGage({
 			    id: "gauge", 
 			    value: value, 
-			    valueFontColor: 'white',
+			    valueFontColor: 'black',
 			    min: 0,
 			    max: max,
 			    title: "Current Consumption",
-			    titleFontColor: "white",
+			    titleFontColor: "black",
 			    label: label
 			  }); 
 			setInterval(function(){
@@ -113,70 +114,6 @@ $('#gauge').css({
 				//fine chiamata ajax
 				});
 			}, 10000);
-		}
-	//fine chiamata ajax
-	});
-	
-	//anche qui inserisco max e min
-	//faccio chiamata ajax per avere i valori dell'ultima ora (la rifaccio ogni ora)
-	$.ajax({
-		url : query_last_hour_tot,
-		dataType : "jsonp",
-		error : function(x, t, r) {
-			console.log(x.response.message);
-		},
-		success : function(data) {
-			console.log("success query ultima ora");
-			//memorizzo nel vettori i dati
-			count = data.count;
-			
-			for(var i=0; i<count; i++){
-				last_hour_tot[i] = data.measures[i].value.toFixed(0);
-			}
-
-		},
-		complete : function(qXHR, textStatus) {
-			//ordino
-			last_hour_tot.sort(function (a,b) {
-			    return a - b;
-			});
-			var min = last_hour_tot[0];
-			$("#span_min_tot").html(min);
-			var max = last_hour_tot[count-1];
-			$("#span_max_tot").html(max);
-			//lo inserisco negli span
-			
-			setInterval(function() {
-				$.ajax({
-					url : query_last_hour_tot,
-					dataType : "jsonp",
-					error : function(x, t, r) {
-						console.log(x.response.message);
-					},
-					success : function(data) {
-						console.log("success query ultima ora");
-						//memorizzo nel vettori i dati
-						count = data.count;
-						
-						for(var i=0; i<count; i++){
-							last_hour_tot[i] = data.measures[i].value.toFixed(0);
-						}
-					},
-					complete : function(qXHR, textStatus) {
-						//ordino
-						last_hour.sort(function (a,b) {
-						    return a - b;
-						});
-						//lo inserisco negli span
-						var min = last_hour_tot[0];
-						$("#span_min_tot").html(min);
-						var max = last_hour_tot[count-1];
-						$("#span_max_tot").html(max);
-						
-					}
-				//fine chiamata ajax
-				});
-			}, 60*60*1000);
 		}
 	//fine chiamata ajax
 	});

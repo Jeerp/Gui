@@ -24,24 +24,12 @@ var url = "";
 var datatype="jsonp";
 
 $(document).ready(function(){
-	if(place=="verres"){
-		url = "menustructure/treeMenuVerres.json";
+	if(place=="energy"){
+		url = "menustructure/treeMenuEnergy.json";
 		datatype="json";
 	}
-	else if(place=="corsoduca") {
-		url = "menustructure/treeMenuCorsoDuca.json";
-	}
-	else if(place=="mirafiori"){
-		url = "menustructure/treeMenuMirafiori.json";
-		datatype="json";
-	}
-	else if (place=="clim_mirafiori"){
-		url = "menustructure/treeClimMirafiori.json"
-			datatype="json";
-	}
-	else if(place=="serverFarm"){
-		url = "menustructure/treeServerFarm.json";
-		datatype="json";
+	else if(place=="climate") {
+		url = "menustructure/treeMenuClimate.json";
 	}
 	
 //ajax request
