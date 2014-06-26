@@ -11,7 +11,7 @@
                 "children": [
                     {
                         "id": "Rack1",
-                        "name": "Rack1",
+                        "name": "UPS1",
                         "description": "",
                         "drains": [
                             {
@@ -32,7 +32,7 @@
                     },
                     {
                         "id": "Rack2",
-                        "name": "Rack2",
+                        "name": "UPS2",
                         "description": "",
                         "drains": [
                             {
@@ -53,7 +53,7 @@
                     },
                     {
                         "id": "Rack3",
-                        "name": "Rack3",
+                        "name": "UPS3",
                         "description": "",
                         "drains": [
                             {
